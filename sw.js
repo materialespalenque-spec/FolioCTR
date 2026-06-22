@@ -1,4 +1,4 @@
-const CACHE_NAME = 'control-carga-v2';
+const CACHE_NAME = 'control-carga-v3';
 
 const APP_SHELL = [
   '/FolioCTR/index.html',
