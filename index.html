@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Control de Carga · Folios</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2A241C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Control de Carga">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
 
@@ -275,6 +281,51 @@ tbody tr.row-void td{ color: var(--muted); }
   tbody tr.attempts-row, tbody tr.void-row, tbody tr.pending-row{ padding:0; }
   tbody td{ border-bottom:none; padding:4px 14px; display:flex; justify-content:space-between; gap:10px; }
   tbody td::before{ content: attr(data-label); font-size:10.5px; text-transform:uppercase; font-weight:700; color: var(--muted); flex-shrink:0; }
+
+  /* Topbar en móvil: compacto */
+  .topbar{ flex-wrap:wrap; gap:8px; padding:10px 14px; }
+  .topbar h1{ font-size:15px; }
+  .topbar-right{ flex-direction:row; align-items:center; gap:10px; flex-wrap:wrap; }
+  .clock{ font-size:12px; }
+  .identity-badge{ font-size:11px; }
+
+  /* Overlay / lock screen más compacto */
+  .overlay-card{ padding:22px 18px; margin:10px; }
+
+  /* Formulario de registro */
+  .entry-card{ padding:14px; }
+  .submit-btn{ font-size:15px; padding:14px; }
+
+  /* Controles del historial en columna */
+  .history-controls{ flex-direction:column; gap:8px; }
+  .history-controls input[type="text"]{ width:100%; }
+  .history-controls select{ width:100%; }
+
+  /* Panel de faltantes más cómodo con el dedo */
+  .pending-deliver-controls{ flex-direction:column; gap:8px; }
+  .deliver-confirm-btn{ width:100% !important; padding:14px !important; font-size:15px !important; }
+  .pending-item-row{ flex-direction:column; align-items:flex-start; gap:8px; }
+  .deliver-qty-wrap{ width:100%; justify-content:flex-start; }
+  .deliver-qty{ width:80px; font-size:16px; padding:10px 8px; }
+  .pending-add-form{ padding:12px; }
+  .add-item-row{ flex-direction:column; gap:6px; }
+  .add-item-desc, .add-item-qty, .add-item-reason{ width:100%; min-width:unset; font-size:15px; padding:11px 10px; }
+  .pending-add-actions{ flex-direction:column; }
+  .pending-add-actions .submit-btn{ width:100%; }
+
+  /* Panel de gestión */
+  .manage-add{ flex-direction:column; }
+  .manage-add input, .manage-add select, .manage-add button{ width:100%; }
+
+  /* Mantenimiento */
+  .maintenance{ flex-direction:column; }
+}
+
+/* Área táctil mínima para botones en móvil */
+@media (max-width:640px){
+  .icon-btn{ padding:8px 10px; font-size:15px; }
+  .pending-notice-btn{ padding:10px 14px; }
+  .ghost-btn{ padding:12px 16px; }
 }
 
 /* ---------- Maintenance ---------- */
@@ -1645,6 +1696,13 @@ function updateClock(){
 }
 
 boot();
+
+// Registrar Service Worker (PWA)
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
 </script>
 </body>
 </html>
