@@ -275,57 +275,116 @@ tbody tr.row-void td{ color: var(--muted); }
 .pending-error.show{ display:flex; }
 
 @media (max-width:640px){
+  /* Base: fuente más grande para no tener que hacer zoom */
+  body{ font-size:16px; }
+
   thead{ display:none; }
   table, tbody, tr, td{ display:block; width:100%; }
   tbody tr{ border-bottom:2px solid var(--border); padding:10px 0; }
   tbody tr.attempts-row, tbody tr.void-row, tbody tr.pending-row{ padding:0; }
-  tbody td{ border-bottom:none; padding:4px 14px; display:flex; justify-content:space-between; gap:10px; }
-  tbody td::before{ content: attr(data-label); font-size:10.5px; text-transform:uppercase; font-weight:700; color: var(--muted); flex-shrink:0; }
+  tbody td{ border-bottom:none; padding:6px 14px; display:flex; justify-content:space-between; gap:10px; font-size:15px; }
+  tbody td::before{ content: attr(data-label); font-size:12px; text-transform:uppercase; font-weight:700; color: var(--muted); flex-shrink:0; }
 
-  /* Topbar en móvil: compacto */
-  .topbar{ flex-wrap:wrap; gap:8px; padding:10px 14px; }
-  .topbar h1{ font-size:15px; }
+  /* Topbar compacto pero legible */
+  .topbar{ flex-wrap:wrap; gap:8px; padding:12px 14px; }
+  .topbar h1{ font-size:17px; }
+  .topbar .sub{ font-size:12px; }
   .topbar-right{ flex-direction:row; align-items:center; gap:10px; flex-wrap:wrap; }
-  .clock{ font-size:12px; }
-  .identity-badge{ font-size:11px; }
+  .clock{ font-size:13px; }
+  .identity-badge{ font-size:13px; }
+  .identity-badge button{ font-size:12px; padding:5px 10px; }
 
-  /* Overlay / lock screen más compacto */
-  .overlay-card{ padding:22px 18px; margin:10px; }
+  /* Pantalla del candado */
+  .overlay-card{ padding:24px 18px; margin:10px; }
+  .overlay-card h2{ font-size:18px; }
+  .overlay-card p{ font-size:15px; }
+  .overlay-card input, .overlay-card select{ font-size:16px; padding:14px 12px; }
+  .overlay-label{ font-size:13px; }
 
-  /* Formulario de registro */
+  /* Formulario de registro: campos grandes y cómodos */
   .entry-card{ padding:14px; }
-  .submit-btn{ font-size:15px; padding:14px; }
+  .entry-card h2{ font-size:15px; }
+  .field label{ font-size:13px; }
+  .field input, .field select{ font-size:16px; padding:14px 12px; }
+  .submit-btn{ font-size:17px; padding:16px; border-radius:10px; }
 
-  /* Controles del historial en columna */
+  /* Barra de stats */
+  .stats-bar{ gap:8px; }
+  .stat-num{ font-size:22px; }
+  .stat-label{ font-size:11px; }
+
+  /* Aviso de pendientes */
+  .pending-notice{ padding:12px 14px; }
+  .pending-notice-text{ font-size:15px; }
+  .pending-notice-btn{ font-size:14px; padding:10px 14px; }
+
+  /* Controles del historial */
   .history-controls{ flex-direction:column; gap:8px; }
-  .history-controls input[type="text"]{ width:100%; }
-  .history-controls select{ width:100%; }
+  .history-controls input[type="text"]{ width:100%; font-size:16px; padding:13px 12px; }
+  .history-controls select{ width:100%; font-size:16px; padding:13px 12px; }
+  .toggle-label{ font-size:15px; }
+  .history-section h2{ font-size:16px; }
 
-  /* Panel de faltantes más cómodo con el dedo */
-  .pending-deliver-controls{ flex-direction:column; gap:8px; }
-  .deliver-confirm-btn{ width:100% !important; padding:14px !important; font-size:15px !important; }
-  .pending-item-row{ flex-direction:column; align-items:flex-start; gap:8px; }
-  .deliver-qty-wrap{ width:100%; justify-content:flex-start; }
-  .deliver-qty{ width:80px; font-size:16px; padding:10px 8px; }
-  .pending-add-form{ padding:12px; }
-  .add-item-row{ flex-direction:column; gap:6px; }
-  .add-item-desc, .add-item-qty, .add-item-reason{ width:100%; min-width:unset; font-size:15px; padding:11px 10px; }
-  .pending-add-actions{ flex-direction:column; }
-  .pending-add-actions .submit-btn{ width:100%; }
+  /* Tabla historial: texto más legible */
+  .folio-tag{ font-size:14px; padding:4px 10px; }
+  .status-chip{ font-size:12px; padding:4px 10px; }
+  .branch-tag{ font-size:11px; }
+
+  /* Botones de acción en la tabla */
+  .action-btn{ font-size:13px; padding:8px 12px; }
+
+  /* Panel de faltantes */
+  .pending-panel{ padding:14px; }
+  .pending-hint{ font-size:14px; padding:10px 12px; }
+  .pending-item-row{ flex-direction:column; align-items:flex-start; gap:10px; padding:12px; }
+  .pending-item-desc{ font-size:16px; }
+  .deliver-qty-wrap{ width:100%; justify-content:flex-start; gap:10px; }
+  .deliver-qty-label{ font-size:14px; }
+  .deliver-qty{ width:90px; font-size:18px; padding:12px 10px; }
+  .deliver-remaining-text{ font-size:14px; padding:6px 12px; }
+  .pending-deliver-controls{ flex-direction:column; gap:10px; padding:12px; }
+  .pending-deliver-controls select{ font-size:16px; padding:13px 12px; width:100%; }
+  .deliver-confirm-btn{ width:100% !important; padding:16px !important; font-size:17px !important; border-radius:10px !important; }
+  .pending-error{ font-size:14px; padding:12px 14px; }
+
+  /* Formulario agregar faltante */
+  .pending-add-form{ padding:14px; }
+  .pending-add-form h4{ font-size:15px; }
+  .add-reported-row{ font-size:14px; }
+  .add-item-row{ flex-direction:column; gap:8px; }
+  .add-item-desc, .add-item-qty, .add-item-reason{ width:100%; min-width:unset; font-size:16px; padding:13px 12px; }
+  .pending-add-actions{ flex-direction:column; gap:8px; }
+  .pending-add-actions .submit-btn{ width:100%; font-size:16px; padding:14px; }
+  .ghost-btn{ font-size:15px; padding:13px 16px; width:100%; text-align:center; }
+
+  /* Botones de quitar/editar ítem */
+  .icon-btn{ padding:10px 13px; font-size:16px; }
+  .manage-item{ padding:12px; font-size:15px; }
+  .manage-name{ font-size:15px; }
+  .manage-tag{ font-size:12px; }
 
   /* Panel de gestión */
+  .manage-col h3{ font-size:15px; }
+  .manage-add input, .manage-add select{ font-size:16px; padding:13px 12px; width:100%; }
+  .manage-add button{ font-size:15px; padding:13px; width:100%; }
   .manage-add{ flex-direction:column; }
-  .manage-add input, .manage-add select, .manage-add button{ width:100%; }
+  .manage-list{ max-height:none; }
+
+  /* Banners */
+  .banner{ padding:14px; font-size:15px; }
+  .banner-icon{ font-size:22px; }
 
   /* Mantenimiento */
   .maintenance{ flex-direction:column; }
+  .maint-msg{ font-size:14px; }
+  .footnote{ font-size:13px; }
 }
 
-/* Área táctil mínima para botones en móvil */
+/* Área táctil mínima para todos los botones en móvil */
 @media (max-width:640px){
-  .icon-btn{ padding:8px 10px; font-size:15px; }
-  .pending-notice-btn{ padding:10px 14px; }
-  .ghost-btn{ padding:12px 16px; }
+  .icon-btn{ min-height:44px; min-width:44px; }
+  .pending-notice-btn{ min-height:44px; }
+  button{ min-height:44px; }
 }
 
 /* ---------- Maintenance ---------- */
