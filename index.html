@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control de Carga · Folios</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
+
+:root{
+  --paper:#F2ECDC;
+  --paper-card:#FFFBF2;
+  --ink:#2A241C;
+  --steel:#3F5366;
+  --steel-light:#7E93A4;
+  --orange:#E2570C;
+  --orange-dark:#B8420A;
+  --yellow:#F4B400;
+  --green:#2E6B3E;
+  --green-light:#DEEFDF;
+  --red:#B23A22;
+  --muted:#8A8170;
+  --border:#D8CCA9;
+  --radius:12px;
+}
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body{
+  background: var(--paper);
+  color: var(--ink);
+  font-family:'Inter', sans-serif;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+.mono{ font-family:'JetBrains Mono', monospace; }
+@media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
+a{ color: var(--steel); }
+
+.app{ max-width: 980px; margin: 0 auto; padding: 18px 16px 60px; }
+[hidden]{ display:none !important; }
+
+/* ---------- Overlays (setup / lock) ---------- */
+.overlay{
+  position: fixed; inset:0;
+  background: var(--ink);
+  display:flex; align-items:center; justify-content:center;
+  padding: 20px;
+  z-index: 100;
+}
+.overlay-card{
+  background: var(--paper-card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 26px;
+  max-width: 480px;
+  width:100%;
+}
+.overlay-card h2{
+  font-family:'Archivo Black';
+  font-size: 18px;
+  margin: 0 0 12px;
+  color: var(--steel);
+}
+.overlay-card p{ font-size: 14px; line-height:1.6; margin: 0 0 12px; }
+.overlay-card ol{ font-size: 13.5px; line-height:1.7; padding-left: 20px; margin: 0 0 14px; }
+.overlay-card code{
+  background:#EFE7D2; padding:2px 5px; border-radius:4px; font-family:'JetBrains Mono'; font-size:12.5px;
+}
+.overlay-card input{
+  width:100%; padding: 13px 12px; font-size:16px;
+  border:2px solid var(--border); border-radius:8px; margin-bottom:10px;
+  font-family:'JetBrains Mono';
+}
+.overlay-card input:focus-visible{ outline:3px solid var(--steel-light); border-color:var(--steel); }
+.overlay-card select{
+  width:100%; padding: 13px 12px; font-size:16px;
+  border:2px solid var(--border); border-radius:8px; margin-bottom:10px;
+  font-family:'Inter'; background:#fff; color: var(--ink);
+}
+.overlay-card select:focus-visible{ outline:3px solid var(--steel-light); border-color:var(--steel); }
+.overlay-label{ display:block; font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color: var(--muted); margin:8px 0 6px; }
+
+.global-error{
+  position: fixed; top:0; left:0; right:0;
+  background: var(--red); color:#fff;
+  padding: 10px 16px; font-size: 13px; font-weight:600;
+  text-align:center; z-index:90;
+}
+
+/* ---------- Header ---------- */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding: 14px 18px; background: var(--ink); color: var(--paper);
+  border-radius: var(--radius); margin-bottom: 18px;
+}
+.topbar h1{ font-family:'Archivo Black', sans-serif; font-size: 17px; letter-spacing:0.3px; margin:0; line-height:1.25; }
+.topbar .sub{ display:block; font-weight:500; font-size:11.5px; color: var(--yellow); letter-spacing:0.6px; text-transform:uppercase; margin-top:2px; }
+.topbar-right{ display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
+.clock{ font-family:'JetBrains Mono'; font-size:13px; color: var(--paper); opacity:0.85; text-align:right; white-space:nowrap; }
+.identity-badge{ font-size:11.5px; color: var(--paper); display:flex; align-items:center; gap:7px; white-space:nowrap; }
+.identity-badge-text{ font-weight:700; }
+.identity-badge button{ background:none; border:1px solid var(--yellow); color: var(--yellow); font-size:10px; font-weight:700; padding:3px 8px; border-radius:5px; cursor:pointer; }
+.identity-badge button:hover{ background: var(--yellow); color: var(--ink); }
+
+/* ---------- Pending notice ---------- */
+.pending-notice{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  background: #FFF6DD; border:2px solid var(--yellow); border-radius:10px;
+  padding:10px 14px; margin-bottom:14px; font-size:13.5px;
+}
+.pending-notice-icon{ font-size:18px; }
+.pending-notice-text{ flex:1; font-weight:600; color:#7A5B00; }
+.pending-notice-btn{ background: var(--yellow); border:none; color:var(--ink); font-weight:700; font-size:12.5px; padding:7px 12px; border-radius:7px; cursor:pointer; }
+.pending-notice-btn:hover{ background:#E0A800; }
+
+/* ---------- Entry card ---------- */
+.entry-card{ background: var(--paper-card); border:2px solid var(--border); border-radius: var(--radius); padding: 20px; }
+.entry-card h2{ font-family:'Archivo Black'; font-size:14px; margin:0 0 14px; color: var(--steel); letter-spacing:0.3px; }
+.field-row{ display:grid; grid-template-columns: 1.1fr 1.3fr 1.1fr; gap:12px; margin-bottom:12px; }
+.field-row-2{ grid-template-columns: 1fr 1fr; }
+@media (max-width:640px){ .field-row{ grid-template-columns: 1fr; } }
+.field label{ display:block; font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color: var(--muted); margin-bottom:6px; }
+.field input, .field select{
+  width:100%; padding:13px 12px; font-size:16px; border:2px solid var(--border); border-radius:8px;
+  background:#fff; color: var(--ink); font-family:'JetBrains Mono', monospace;
+}
+.field input::placeholder{ color:#B9AF95; font-family:'Inter'; }
+.field input:focus-visible, .field select:focus-visible{ outline:3px solid var(--steel-light); outline-offset:1px; border-color: var(--steel); }
+.field-error{ font-size:12.5px; color: var(--red); font-weight:600; margin-top:6px; display:none; }
+.field-error.show{ display:block; }
+.field-hint{ font-size:12px; color: var(--orange-dark); margin-top:6px; }
+
+.submit-btn{
+  width:100%; padding:15px; font-family:'Archivo Black'; font-size:14.5px; letter-spacing:0.4px;
+  color:#fff; background: var(--steel); border:none; border-radius:8px; cursor:pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+.submit-btn:hover{ background:#34465A; }
+.submit-btn:active{ transform: translateY(1px); }
+.submit-btn:disabled{ opacity:0.6; cursor:default; }
+.submit-btn:focus-visible{ outline:3px solid var(--yellow); outline-offset:2px; }
+
+/* ---------- Banner ---------- */
+#bannerArea{ margin-top:16px; }
+.banner{ border-radius:10px; overflow:hidden; animation: slideIn 0.22s ease; }
+@keyframes slideIn{ from{opacity:0; transform:translateY(-6px);} to{opacity:1; transform:translateY(0);} }
+.banner-ok{ display:flex; gap:14px; align-items:flex-start; padding:16px 18px; background: var(--green-light); border:2px solid var(--green); }
+.banner-ok .banner-icon{ font-size:24px; color: var(--green); line-height:1.2; }
+.banner-ok .banner-text{ font-size:14.5px; line-height:1.5; }
+.banner-ok strong{ font-family:'JetBrains Mono'; font-size:14.5px; }
+.banner-dup{ border:3px solid var(--orange-dark); background: var(--paper-card); box-shadow:0 4px 14px rgba(0,0,0,0.14); }
+.banner-dup .banner-stripe{ height:10px; background-image: repeating-linear-gradient(45deg, var(--orange) 0 14px, var(--ink) 14px 28px); }
+.banner-dup .banner-content{ display:flex; gap:14px; align-items:flex-start; padding:18px 20px; }
+.banner-dup .banner-icon{ font-size:28px; color: var(--orange-dark); line-height:1.1; }
+.banner-dup .banner-text{ font-size:14.5px; line-height:1.6; }
+.banner-dup strong{ font-family:'JetBrains Mono'; }
+.banner-pending{ display:flex; gap:14px; align-items:flex-start; padding:16px 18px; background:#FFF6DD; border:2px solid var(--yellow); }
+.banner-pending .banner-icon{ font-size:24px; }
+.banner-pending .banner-text{ font-size:14.5px; line-height:1.5; }
+.banner-pending strong{ font-family:'JetBrains Mono'; }
+
+/* ---------- Stats ---------- */
+.stats-bar{ display:flex; gap:10px; margin-top:20px; padding-top:18px; border-top:2px dashed var(--border); flex-wrap:wrap; }
+.stat{ flex:1; min-width:130px; background: var(--paper-card); border:2px solid var(--border); border-radius:10px; padding:12px 14px; text-align:center; }
+.stat-num{ display:block; font-family:'Archivo Black'; font-size:26px; color: var(--steel); }
+.stat-label{ display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.4px; color: var(--muted); margin-top:2px; font-weight:600; }
+.stat-alert .stat-num{ color: var(--orange-dark); }
+.stat-alert{ border-color: var(--orange); background:#FCEFE6; }
+.stat-warn .stat-num{ color:#8A6300; }
+.stat-warn{ border-color: var(--yellow); background:#FFFBEE; }
+
+/* ---------- Manage panel ---------- */
+.manage-toggle-wrap{ margin-top:18px; }
+.manage-panel{ margin-top:14px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+@media (max-width:900px){ .manage-panel{ grid-template-columns:1fr 1fr; } }
+@media (max-width:640px){ .manage-panel{ grid-template-columns:1fr; } }
+.manage-col{ background: var(--paper-card); border:2px solid var(--border); border-radius: var(--radius); padding:16px; }
+.manage-col h3{ font-family:'Archivo Black'; font-size:13px; color: var(--steel); margin:0 0 12px; }
+.manage-add{ display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.manage-add input, .manage-add select{ flex:1; min-width:100px; padding:10px 11px; font-size:14px; border:2px solid var(--border); border-radius:7px; font-family:'Inter'; }
+.manage-add input:focus-visible, .manage-add select:focus-visible{ outline:3px solid var(--steel-light); border-color: var(--steel); }
+.manage-add button{ background: var(--steel); color:#fff; border:none; padding:10px 14px; border-radius:7px; font-weight:700; font-size:13px; cursor:pointer; }
+.manage-add button:hover{ background:#34465A; }
+.manage-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; max-height:280px; overflow-y:auto; }
+.manage-item{ display:flex; align-items:center; justify-content:space-between; gap:8px; background:#fff; border:1.5px solid var(--border); border-radius:7px; padding:8px 10px; font-size:13.5px; }
+.manage-name{ overflow-wrap:anywhere; }
+.manage-tag{ display:inline-block; background:#E4ECF1; color: var(--steel); font-size:10px; font-weight:700; padding:1px 7px; border-radius:10px; margin-left:6px; text-transform:uppercase; letter-spacing:0.3px; }
+.manage-tag-warn{ background:#FCEFE6; color: var(--orange-dark); }
+.manage-actions{ display:flex; gap:6px; flex-shrink:0; }
+.icon-btn{ background:none; border:1.5px solid var(--border); border-radius:6px; padding:4px 7px; cursor:pointer; font-size:13px; line-height:1; }
+.icon-btn:hover{ border-color: var(--steel); }
+.manage-empty{ font-size:12.5px; color: var(--muted); padding:6px 2px; }
+.manage-edit-row{ display:flex; gap:6px; flex:1; flex-wrap:wrap; }
+.manage-edit-row input, .manage-edit-row select{ flex:1; min-width:90px; padding:6px 8px; border:1.5px solid var(--steel); border-radius:6px; font-family:'Inter'; font-size:13px; }
+.manage-confirm{ display:flex; align-items:center; gap:8px; font-size:12.5px; color: var(--red); flex:1; flex-wrap:wrap; }
+.manage-confirm button{ font-size:12px; padding:4px 9px; border-radius:6px; cursor:pointer; }
+.btn-yes{ background: var(--red); color:#fff; border:none; }
+.btn-no{ background:none; border:1.5px solid var(--border); color: var(--steel); }
+
+/* ---------- History ---------- */
+.history-section{ margin-top:26px; }
+.history-section h2{ font-family:'Archivo Black'; font-size:14px; color: var(--steel); margin:0 0 12px; }
+.history-controls{ display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap; align-items:center; }
+.history-controls input[type="text"]{ flex:1; min-width:160px; padding:10px 12px; font-size:14px; border:2px solid var(--border); border-radius:8px; font-family:'Inter'; background: var(--paper-card); }
+.history-controls input[type="text"]:focus-visible{ outline:3px solid var(--steel-light); border-color: var(--steel); }
+.history-controls select{ padding:10px 12px; font-size:14px; border:2px solid var(--border); border-radius:8px; font-family:'Inter'; background: var(--paper-card); }
+.toggle-label{ display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color: var(--steel); white-space:nowrap; cursor:pointer; }
+
+.table-wrap{ background: var(--paper-card); border:2px solid var(--border); border-radius: var(--radius); overflow:hidden; }
+table{ width:100%; border-collapse:collapse; }
+thead th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.4px; color: var(--muted); font-weight:700; padding:10px 12px; background:#EFE7D2; border-bottom:2px solid var(--border); }
+tbody td{ padding:11px 12px; font-size:13.5px; border-bottom:1px solid var(--border); vertical-align:middle; }
+tbody tr.row-flagged{ background:#FCF3E8; }
+tbody tr.row-pending{ background:#FFFBEE; }
+tbody tr.row-void td{ color: var(--muted); }
+.folio-tag{ background: var(--ink); color: var(--paper); padding:3px 8px; border-radius:5px; font-size:12.5px; font-weight:700; }
+.branch-tag{ display:inline-block; background:#E4ECF1; color: var(--steel); font-size:10px; font-weight:700; padding:1px 7px; border-radius:10px; margin-left:5px; text-transform:uppercase; letter-spacing:0.3px; white-space:nowrap; }
+.chip{ display:inline-block; font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; text-transform:uppercase; letter-spacing:0.3px; }
+.chip-ok{ background: var(--green-light); color: var(--green); }
+.chip-void{ background:#EAE4D2; color: var(--muted); }
+.chip-pending{ background:#FFF1C2; color:#8A6300; }
+.attempts-toggle{ background:none; border:1.5px solid var(--orange); color: var(--orange-dark); font-size:12px; font-weight:700; padding:3px 8px; border-radius:6px; cursor:pointer; }
+.pending-toggle-btn{ background:none; border:1.5px solid var(--yellow); color:#8A6300; font-size:12px; font-weight:700; padding:3px 8px; border-radius:6px; cursor:pointer; }
+.void-btn{ background:none; border:1.5px solid var(--border); color: var(--steel); font-size:12px; font-weight:600; padding:4px 9px; border-radius:6px; cursor:pointer; }
+.void-btn:hover{ border-color: var(--red); color: var(--red); }
+.muted{ color: var(--muted); font-size:12.5px; }
+.attempts-detail{ background:#FCEFE6; border:1.5px dashed var(--orange); border-radius:8px; padding:10px 12px; font-size:13px; }
+.attempt-item{ padding:3px 0; line-height:1.5; }
+.void-form{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; background:#F4F0E2; border-radius:8px; padding:10px 12px; }
+.void-reason{ flex:1; min-width:160px; padding:8px 10px; border:1.5px solid var(--border); border-radius:6px; font-family:'Inter'; font-size:13px; }
+.void-confirm-btn{ background: var(--red); color:#fff; border:none; padding:8px 12px; border-radius:6px; font-size:12.5px; font-weight:700; cursor:pointer; }
+.void-cancel-btn{ background:none; border:1.5px solid var(--border); color: var(--steel); padding:8px 12px; border-radius:6px; font-size:12.5px; font-weight:600; cursor:pointer; }
+.empty-state{ padding:30px 20px; text-align:center; color: var(--muted); font-size:14px; }
+
+/* ---------- Pending items panel ---------- */
+.pending-panel{ background:#FFFCF2; border:1.5px dashed var(--yellow); border-radius:8px; padding:12px 14px; display:flex; flex-direction:column; gap:14px; }
+.pending-hint{ font-size:12px; color:#7A5B00; background:#FFF1C2; border-radius:6px; padding:8px 10px; line-height:1.5; }
+.pending-list{ display:flex; flex-direction:column; gap:8px; }
+.pending-item-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; background:#fff; border:1.5px solid var(--border); border-radius:7px; padding:9px 10px; font-size:13px; }
+.pending-item-row:has(.deliver-check:checked){ background:#E9F4EC; border-color: var(--green); }
+.pending-item-row.item-delivered{ opacity:0.55; }
+.pending-item-row.item-delivered span{ text-decoration: line-through; }
+.pending-item-desc{ flex:1; min-width:160px; }
+.deliver-check-label{ display:flex; align-items:center; gap:6px; cursor:pointer; flex-shrink:0; background:#F4F0E2; border:1.5px solid var(--border); border-radius:6px; padding:6px 10px; user-select:none; }
+.deliver-check-label input[type="checkbox"]{ width:19px; height:19px; accent-color: var(--green); cursor:pointer; flex-shrink:0; }
+.deliver-check-text{ font-size:12px; font-weight:700; color: var(--steel); white-space:nowrap; }
+.deliver-qty-wrap{ display:flex; align-items:center; gap:6px; flex-shrink:0; flex-wrap:wrap; }
+.deliver-qty-label{ font-size:11.5px; color: var(--muted); font-weight:600; white-space:nowrap; }
+.deliver-remaining-text{ font-size:12px; font-weight:700; color: var(--steel); white-space:nowrap; background:#EFE7D2; padding:4px 9px; border-radius:6px; border:1px solid var(--border); }
+.deliver-qty:disabled{ background:#ECECEC; color: var(--muted); cursor:not-allowed; border-color:var(--border); }
+.deliver-qty{ width:68px; padding:6px 7px; border:1.5px solid var(--border); border-radius:6px; font-family:'JetBrains Mono'; font-size:13px; }
+.remove-pending-btn{ background:none; border:1.5px solid var(--border); color: var(--red); font-size:11.5px; font-weight:600; padding:6px 10px; border-radius:6px; cursor:pointer; flex-shrink:0; white-space:nowrap; }
+.remove-pending-btn:hover{ border-color: var(--red); background:#FCEFE6; }
+.pending-deliver-controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.pending-deliver-controls select{ padding:8px 9px; border:1.5px solid var(--border); border-radius:6px; font-size:13px; font-family:'Inter'; }
+.deliver-confirm-btn{ width:auto; padding:9px 16px; font-size:13px; }
+.pending-add-form{ border-top:1.5px dashed var(--border); padding-top:12px; }
+.pending-add-form h4{ font-size:12.5px; text-transform:uppercase; letter-spacing:0.4px; color: var(--muted); margin:0 0 8px; }
+.add-reported-row{ display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+.add-reported-label{ font-size:12.5px; font-weight:700; color: var(--muted); }
+.add-reported-row select{ padding:8px 9px; border:1.5px solid var(--border); border-radius:6px; font-size:13px; font-family:'Inter'; }
+.add-item-row{ display:flex; gap:7px; flex-wrap:wrap; margin-bottom:7px; }
+.add-item-row input{ padding:8px 9px; border:1.5px solid var(--border); border-radius:6px; font-size:13px; font-family:'Inter'; }
+.add-item-desc{ flex:2; min-width:140px; }
+.add-item-qty{ width:90px; }
+.add-item-reason{ flex:2; min-width:160px; }
+.pending-add-actions{ display:flex; gap:8px; margin-top:6px; flex-wrap:wrap; align-items:center; }
+.pending-error{ display:none; align-items:center; gap:8px; font-size:13px; color:#7A1F0A; font-weight:700; margin-top:8px; padding:10px 13px; background:#FBEAE5; border:1.5px solid var(--red); border-radius:8px; }
+.pending-error.show{ display:flex; }
+
+@media (max-width:640px){
+  thead{ display:none; }
+  table, tbody, tr, td{ display:block; width:100%; }
+  tbody tr{ border-bottom:2px solid var(--border); padding:10px 0; }
+  tbody tr.attempts-row, tbody tr.void-row, tbody tr.pending-row{ padding:0; }
+  tbody td{ border-bottom:none; padding:4px 14px; display:flex; justify-content:space-between; gap:10px; }
+  tbody td::before{ content: attr(data-label); font-size:10.5px; text-transform:uppercase; font-weight:700; color: var(--muted); flex-shrink:0; }
+}
+
+/* ---------- Maintenance ---------- */
+.maintenance{ margin-top:26px; padding-top:18px; border-top:2px dashed var(--border); display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.ghost-btn{ background:none; border:1.5px solid var(--steel); color: var(--steel); font-size:12.5px; font-weight:700; padding:9px 14px; border-radius:8px; cursor:pointer; }
+.ghost-btn:hover{ background: var(--steel); color:#fff; }
+.cleanup-confirm{ display:none; align-items:center; gap:10px; background:#FCEFE6; border:1.5px dashed var(--orange); border-radius:8px; padding:10px 12px; font-size:12.5px; }
+.cleanup-confirm.show{ display:flex; flex-wrap:wrap; }
+.maint-msg{ font-size:12.5px; color: var(--green); font-weight:700; }
+.footnote{ font-size:11.5px; color: var(--muted); margin-top:14px; line-height:1.6; }
+</style>
+</head>
+<body>
+
+<div class="overlay" id="setupScreen" hidden>
+  <div class="overlay-card">
+    <h2>Falta conectar la base de datos</h2>
+    <p>Esta página guarda todo en Firebase (gratis). Sigue estos pasos una sola vez:</p>
+    <ol>
+      <li>Entra a <a href="https://console.firebase.google.com" target="_blank" rel="noopener">console.firebase.google.com</a> y crea un proyecto nuevo.</li>
+      <li><strong>Databases &amp; Storage → Firestore</strong> → crear base de datos (modo producción).</li>
+      <li><strong>Security → Authentication → Sign-in method</strong> → activa <strong>Anónimo</strong>.</li>
+      <li><strong>Configuración del proyecto → Tus apps → Agregar app → Web (&lt;/&gt;)</strong> → copia el objeto <code>firebaseConfig</code>.</li>
+      <li>Pega esos valores aquí mismo, al inicio del bloque <code>&lt;script&gt;</code>, donde dice <code>firebaseConfig</code>.</li>
+      <li>En Firestore → <strong>Reglas</strong>, pega las reglas de seguridad que te di en el chat.</li>
+    </ol>
+    <p>Cuando termines, guarda el archivo y recarga esta página.</p>
+  </div>
+</div>
+
+<div class="overlay" id="lockScreen" hidden>
+  <div class="overlay-card">
+    <h2>Acceso al control de carga</h2>
+    <p>Selecciona tu sucursal y tu nombre. Solo lo haces una vez por dispositivo.</p>
+
+    <div id="codeFieldWrap">
+      <input type="password" id="accessCodeInput" placeholder="Código de acceso" autocomplete="off">
+      <div class="field-error" id="accessError">Código incorrecto, intenta de nuevo.</div>
+    </div>
+
+    <label class="overlay-label" for="branchSelect">Sucursal</label>
+    <select id="branchSelect">
+      <option value="">Selecciona tu sucursal...</option>
+    </select>
+
+    <label class="overlay-label" for="identityNameSelect">Tu nombre</label>
+    <select id="identityNameSelect">
+      <option value="">Primero elige tu sucursal...</option>
+    </select>
+    <div class="field-error" id="identityError">Selecciona tu sucursal y tu nombre.</div>
+    <div class="field-hint" id="noBranchesHint" hidden>Todavía no hay sucursales o encargados configurados. Puedes entrar solo con el código y agregarlos en "Gestionar sucursales, choferes y encargados".</div>
+
+    <button type="button" id="accessCodeBtn" class="submit-btn">Entrar</button>
+  </div>
+</div>
+
+<div class="global-error" id="globalError" hidden></div>
+
+<div class="app" id="appRoot" hidden>
+
+  <div class="topbar">
+    <div>
+      <h1>Control de Carga</h1>
+      <span class="sub">Registro de folios despachados</span>
+    </div>
+    <div class="topbar-right">
+      <div class="identity-badge">🏪 <span class="identity-badge-text" id="identityBadgeText">—</span> <button type="button" id="changeIdentityBtn" title="Cambiar de sucursal o nombre">Cambiar</button></div>
+      <div class="clock" id="clockDisplay">—</div>
+    </div>
+  </div>
+
+  <div class="pending-notice" id="pendingNotice" hidden>
+    <span class="pending-notice-icon">📦</span>
+    <span class="pending-notice-text" id="pendingNoticeText"></span>
+    <button type="button" class="pending-notice-btn" id="pendingNoticeBtn">Ver pendientes</button>
+  </div>
+
+  <form class="entry-card" id="entryForm" novalidate>
+    <h2>Registrar carga</h2>
+    <div class="field-row field-row-2">
+      <div class="field">
+        <label for="folioInput">Folio del ticket</label>
+        <input type="text" id="folioInput" placeholder="Ej. 10234" autocomplete="off">
+        <div class="field-error" id="folioError">Escribe el número de folio.</div>
+      </div>
+      <div class="field">
+        <label for="driverSelect">Chofer</label>
+        <select id="driverSelect">
+          <option value="">Selecciona un chofer...</option>
+        </select>
+        <div class="field-error" id="driverError">Selecciona un chofer.</div>
+        <div class="field-hint" id="driverHint" hidden>No hay choferes registrados. Agrégalos abajo en "Gestionar choferes y encargados".</div>
+      </div>
+    </div>
+    <button type="submit" class="submit-btn" id="submitBtn">Registrar carga</button>
+  </form>
+
+  <div id="bannerArea"></div>
+  <div class="stats-bar" id="statsBar"></div>
+
+  <div class="manage-toggle-wrap">
+    <button type="button" class="ghost-btn" id="manageToggleBtn">⚙ Gestionar sucursales, choferes y encargados</button>
+  </div>
+  <div class="manage-panel" id="managePanel" hidden>
+    <div class="manage-col">
+      <h3>Sucursales</h3>
+      <form class="manage-add" id="addBranchForm">
+        <input type="text" id="newBranchName" placeholder="Nombre de la sucursal" autocomplete="off">
+        <button type="submit">Agregar</button>
+      </form>
+      <ul class="manage-list" id="branchesManageList"></ul>
+    </div>
+    <div class="manage-col">
+      <h3>Choferes</h3>
+      <form class="manage-add" id="addDriverForm">
+        <input type="text" id="newDriverName" placeholder="Nombre del chofer" autocomplete="off">
+        <button type="submit">Agregar</button>
+      </form>
+      <ul class="manage-list" id="driversManageList"></ul>
+    </div>
+    <div class="manage-col">
+      <h3>Encargados</h3>
+      <form class="manage-add" id="addLoaderForm">
+        <input type="text" id="newLoaderName" placeholder="Nombre del encargado" autocomplete="off">
+        <select id="newLoaderBranch"><option value="">Sucursal...</option></select>
+        <button type="submit">Agregar</button>
+      </form>
+      <ul class="manage-list" id="loadersManageList"></ul>
+    </div>
+  </div>
+
+  <div class="history-section">
+    <h2>Historial de folios</h2>
+    <div class="history-controls">
+      <input type="text" id="searchInput" placeholder="Buscar por folio o chofer...">
+      <select id="branchFilter"><option value="">Todas las sucursales</option></select>
+      <label class="toggle-label"><input type="checkbox" id="todayToggle" checked> Solo hoy</label>
+      <label class="toggle-label"><input type="checkbox" id="pendingToggle"> Solo con faltantes</label>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Folio</th><th>Chofer</th><th>Cargó</th><th>Hora</th><th>Estado</th><th>Alertas</th><th>Pendientes</th><th>Acción</th></tr></thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="maintenance">
+    <button type="button" class="ghost-btn" id="exportBtn">Exportar historial (CSV)</button>
+    <button type="button" class="ghost-btn" id="exportPdfBtn">Exportar historial (PDF)</button>
+    <button type="button" class="ghost-btn" id="cleanupBtn">Archivar registros de hace más de 30 días</button>
+    <span class="maint-msg" id="maintMsg"></span>
+  </div>
+  <label class="toggle-label" style="margin-top:6px; margin-bottom:8px; display:inline-flex;">
+    <input type="checkbox" id="detailToggle"> 📋 Incluir "Detalles de entregas" (movimientos) en el PDF
+  </label>
+  <p class="footnote" id="pdfHint">El PDF respeta los filtros que tengas activos arriba (Solo hoy / Solo con faltantes / búsqueda) — útil para generar un reporte de un día, de un chofer, o de todos los pendientes. Activa "Detalles de entregas" para agregar el historial completo de cómo se fue resolviendo cada ticket incompleto: quién reportó el faltante y quién entregó cada parte, con fecha y hora.</p>
+  <div class="cleanup-confirm" id="cleanupConfirm">
+    <span>Esto exporta un respaldo CSV completo y borra del registro activo los folios completos o anulados con más de 30 días (los que tienen entregas pendientes nunca se borran). ¿Confirmas?</span>
+    <button type="button" class="void-confirm-btn" id="cleanupConfirmBtn">Sí, archivar</button>
+    <button type="button" class="void-cancel-btn" id="cleanupCancelBtn">Cancelar</button>
+  </div>
+
+  <p class="footnote">Esta página guarda los datos en Firebase: todas las personas con el enlace y el código de acceso ven y registran sobre el mismo historial en tiempo real.</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/12.3.0/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/12.3.0/firebase-auth-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/12.3.0/firebase-firestore-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.2/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+/* ============================================================
+   CONFIGURA AQUÍ ANTES DE PUBLICAR
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyBIoE39L4RGQzbLo8cwLEPkvscVG6P2aJE",
+  authDomain: "controlticket-96de3.firebaseapp.com",
+  projectId: "controlticket-96de3",
+  storageBucket: "controlticket-96de3.firebasestorage.app",
+  messagingSenderId: "543602835884",
+  appId: "1:543602835884:web:215185beb1591f8a65ba09",
+  measurementId: "G-QBTNVHW5CF"
+};
+
+// Código de acceso compartido del equipo. Déjalo como "" para quitar el candado.
+const ACCESS_CODE = "admin";
+/* ============================================================ */
+
+const NEEDS_SETUP = !firebaseConfig.apiKey || firebaseConfig.apiKey.indexOf('TU_') === 0;
+const TZ = 'America/Mexico_City';
+
+const el = (id) => document.getElementById(id);
+const setupScreen = el('setupScreen');
+const lockScreen = el('lockScreen');
+const codeFieldWrap = el('codeFieldWrap');
+const accessCodeInput = el('accessCodeInput');
+const accessCodeBtn = el('accessCodeBtn');
+const accessError = el('accessError');
+const branchSelect = el('branchSelect');
+const identityNameSelect = el('identityNameSelect');
+const identityError = el('identityError');
+const noBranchesHint = el('noBranchesHint');
+const globalError = el('globalError');
+const appRoot = el('appRoot');
+const identityBadgeText = el('identityBadgeText');
+const changeIdentityBtn = el('changeIdentityBtn');
+
+const form = el('entryForm');
+const folioInput = el('folioInput');
+const driverSelect = el('driverSelect');
+const folioError = el('folioError');
+const driverError = el('driverError');
+const driverHint = el('driverHint');
+const submitBtn = el('submitBtn');
+const bannerArea = el('bannerArea');
+const statsBar = el('statsBar');
+const historyBody = el('historyBody');
+const searchInput = el('searchInput');
+const branchFilter = el('branchFilter');
+const todayToggle = el('todayToggle');
+const pendingToggle = el('pendingToggle');
+const pendingNotice = el('pendingNotice');
+const pendingNoticeText = el('pendingNoticeText');
+const pendingNoticeBtn = el('pendingNoticeBtn');
+const clockDisplay = el('clockDisplay');
+const exportBtn = el('exportBtn');
+const exportPdfBtn = el('exportPdfBtn');
+const detailToggle = el('detailToggle');
+const cleanupBtn = el('cleanupBtn');
+const cleanupConfirm = el('cleanupConfirm');
+const cleanupConfirmBtn = el('cleanupConfirmBtn');
+const cleanupCancelBtn = el('cleanupCancelBtn');
+const maintMsg = el('maintMsg');
+const manageToggleBtn = el('manageToggleBtn');
+const managePanel = el('managePanel');
+const addBranchForm = el('addBranchForm');
+const newBranchName = el('newBranchName');
+const addDriverForm = el('addDriverForm');
+const newDriverName = el('newDriverName');
+const addLoaderForm = el('addLoaderForm');
+const newLoaderName = el('newLoaderName');
+const newLoaderBranch = el('newLoaderBranch');
+const branchesManageList = el('branchesManageList');
+const driversManageList = el('driversManageList');
+const loadersManageList = el('loadersManageList');
+
+let db = null;
+let cache = { folios:{}, drivers:[], loaders:[], branches:[] };
+let currentIdentity = { branch:'', name:'' };
+let identityTouched = false;
+let deliveringFolios = new Set();
+let savingPending = new Set();
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function dayKey(isoString){ return new Date(isoString).toLocaleDateString('en-CA', { timeZone: TZ }); }
+function fmtDateTime(isoString){ return new Date(isoString).toLocaleString('es-MX', { timeZone: TZ, day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }); }
+function showGlobalError(msg){ globalError.textContent = msg; globalError.hidden = false; }
+
+/* ---------------- Boot / access / identidad ---------------- */
+function boot(){
+  if(NEEDS_SETUP){ setupScreen.hidden = false; return; }
+  startPreBoot();
+  codeFieldWrap.hidden = !ACCESS_CODE;
+  lockScreen.hidden = false;
+  prefillSavedIdentity();
+  if(ACCESS_CODE) accessCodeInput.focus(); else branchSelect.focus();
+}
+function prefillSavedIdentity(){
+  if(identityTouched) return;
+  try{
+    const saved = JSON.parse(localStorage.getItem('identity') || 'null');
+    if(saved && saved.branch){
+      if(cache.branches.some(b => b.name === saved.branch)) branchSelect.value = saved.branch;
+      renderIdentityNameOptions();
+      if(saved.name) identityNameSelect.value = saved.name;
+    }
+  }catch(e){ /* localStorage no disponible o dato corrupto: se ignora */ }
+}
+branchSelect.addEventListener('change', () => { identityTouched = true; renderIdentityNameOptions(); });
+identityNameSelect.addEventListener('change', () => { identityTouched = true; });
+
+function unlockApp(){
+  lockScreen.hidden = true;
+  appRoot.hidden = false;
+  updateIdentityBadge();
+  if(cache.branches.some(b => b.name === currentIdentity.branch)) branchFilter.value = currentIdentity.branch;
+  attachListeners();
+}
+function updateIdentityBadge(){
+  identityBadgeText.textContent = (currentIdentity.branch && currentIdentity.name)
+    ? `${currentIdentity.branch} · ${currentIdentity.name}` : '—';
+}
+changeIdentityBtn.addEventListener('click', () => {
+  try{ localStorage.removeItem('identity'); }catch(e){}
+  location.reload();
+});
+
+function identitySelectionPossible(){
+  if(cache.branches.length === 0) return false;
+  return cache.loaders.some(l => l.branch && cache.branches.some(b => b.name === l.branch));
+}
+function updateBootstrapHint(){
+  noBranchesHint.hidden = identitySelectionPossible();
+}
+
+accessCodeBtn.addEventListener('click', () => {
+  if(ACCESS_CODE && accessCodeInput.value !== ACCESS_CODE){
+    accessError.classList.add('show');
+    accessCodeInput.value = '';
+    accessCodeInput.focus();
+    return;
+  }
+  accessError.classList.remove('show');
+  const canSelectIdentity = identitySelectionPossible();
+  const branchName = branchSelect.value;
+  const name = identityNameSelect.value;
+  if(canSelectIdentity && (!branchName || !name)){
+    identityError.classList.add('show');
+    return;
+  }
+  identityError.classList.remove('show');
+  currentIdentity = canSelectIdentity ? { branch: branchName, name } : { branch: '', name: '' };
+  if(canSelectIdentity){
+    try{ localStorage.setItem('identity', JSON.stringify(currentIdentity)); }catch(e){}
+  }
+  unlockApp();
+});
+accessCodeInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') accessCodeBtn.click(); });
+identityNameSelect.addEventListener('keydown', (e) => { if(e.key === 'Enter') accessCodeBtn.click(); });
+
+/* ---------------- Firebase ---------------- */
+function startPreBoot(){
+  try{
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    firebase.auth().onAuthStateChanged(user => { if(user) attachPreBootListeners(); });
+    firebase.auth().signInAnonymously().catch(err => {
+      showGlobalError('No se pudo conectar (autenticación anónima). Revisa que esté activada en Firebase y que la configuración sea correcta. Detalle: ' + err.message);
+    });
+  }catch(err){
+    showGlobalError('Error iniciando Firebase. Revisa firebaseConfig. Detalle: ' + err.message);
+  }
+}
+
+function attachPreBootListeners(){
+  db.collection('branches').orderBy('name').onSnapshot(snap => {
+    cache.branches = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderBranchDependentSelects();
+    renderManageList('branches');
+    prefillSavedIdentity();
+    updateBootstrapHint();
+    renderHistory();
+  }, err => showGlobalError('Error leyendo sucursales: ' + err.message));
+
+  db.collection('loaders').orderBy('name').onSnapshot(snap => {
+    cache.loaders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderIdentityNameOptions();
+    renderManageList('loaders');
+    prefillSavedIdentity();
+    updateBootstrapHint();
+    renderHistory();
+  }, err => showGlobalError('Error leyendo encargados: ' + err.message));
+}
+
+function attachListeners(){
+  db.collection('folios').onSnapshot(snap => {
+    const folios = {};
+    snap.forEach(doc => { folios[doc.id] = doc.data(); });
+    cache.folios = folios;
+    renderStats();
+    renderHistory();
+  }, err => showGlobalError('Error leyendo folios: ' + err.message));
+
+  db.collection('drivers').orderBy('name').onSnapshot(snap => {
+    cache.drivers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderDriverOptions();
+    renderManageList('drivers');
+    renderHistory();
+  }, err => showGlobalError('Error leyendo choferes: ' + err.message));
+
+  updateClock();
+  setInterval(updateClock, 30000);
+  folioInput.focus();
+}
+
+/* ---------------- Sucursal / chofer / identidad selects ---------------- */
+function branchOptionsHTML(){
+  return cache.branches.map(b => `<option value="${escapeHtml(b.name)}">${escapeHtml(b.name)}</option>`).join('');
+}
+function renderBranchDependentSelects(){
+  const prevLock = branchSelect.value;
+  branchSelect.innerHTML = '<option value="">Selecciona tu sucursal...</option>' + branchOptionsHTML();
+  if(cache.branches.some(b => b.name === prevLock)) branchSelect.value = prevLock;
+
+  const prevNL = newLoaderBranch.value;
+  newLoaderBranch.innerHTML = '<option value="">Sucursal...</option>' + branchOptionsHTML();
+  if(cache.branches.some(b => b.name === prevNL)) newLoaderBranch.value = prevNL;
+
+  const prevBF = branchFilter.value;
+  branchFilter.innerHTML = '<option value="">Todas las sucursales</option>' + branchOptionsHTML();
+  if(cache.branches.some(b => b.name === prevBF)) branchFilter.value = prevBF;
+}
+function renderIdentityNameOptions(){
+  const branchName = branchSelect.value;
+  const filtered = branchName ? cache.loaders.filter(l => l.branch === branchName) : [];
+  identityNameSelect.innerHTML = (branchName ? '<option value="">Selecciona tu nombre...</option>' : '<option value="">Primero elige tu sucursal...</option>')
+    + filtered.map(l => `<option value="${escapeHtml(l.name)}">${escapeHtml(l.name)}</option>`).join('');
+}
+function renderDriverOptions(){
+  const current = driverSelect.value;
+  driverSelect.innerHTML = '<option value="">Selecciona un chofer...</option>' +
+    cache.drivers.map(d => `<option value="${escapeHtml(d.name)}">${escapeHtml(d.name)}</option>`).join('');
+  if(cache.drivers.some(d => d.name === current)) driverSelect.value = current;
+  driverHint.hidden = cache.drivers.length > 0;
+}
+
+/* ---------------- Manage panel (CRUD personal) ---------------- */
+manageToggleBtn.addEventListener('click', () => { managePanel.hidden = !managePanel.hidden; });
+
+function getManageListConfig(col){
+  if(col === 'drivers') return { list: cache.drivers, container: driversManageList, emptyLabel: 'choferes' };
+  if(col === 'loaders') return { list: cache.loaders, container: loadersManageList, emptyLabel: 'encargados' };
+  if(col === 'branches') return { list: cache.branches, container: branchesManageList, emptyLabel: 'sucursales' };
+  return null;
+}
+function manageItemHTML(col, item){
+  let tag = '';
+  if(col === 'loaders'){
+    tag = item.branch ? ` <span class="manage-tag">${escapeHtml(item.branch)}</span>` : ` <span class="manage-tag manage-tag-warn">sin sucursal</span>`;
+  }
+  return `
+  <li class="manage-item" data-id="${item.id}">
+    <span class="manage-name">${escapeHtml(item.name)}${tag}</span>
+    <span class="manage-actions">
+      <button type="button" class="icon-btn edit-btn" data-col="${col}" data-id="${item.id}" title="Editar">✏️</button>
+      <button type="button" class="icon-btn delete-btn" data-col="${col}" data-id="${item.id}" title="Eliminar">🗑</button>
+    </span>
+  </li>`;
+}
+function renderManageList(col){
+  const cfg = getManageListConfig(col);
+  if(!cfg) return;
+  if(cfg.list.length === 0){
+    cfg.container.innerHTML = `<li class="manage-empty">Todavía no hay ${cfg.emptyLabel} registrados.</li>`;
+    return;
+  }
+  cfg.container.innerHTML = cfg.list.map(item => manageItemHTML(col, item)).join('');
+}
+function findManageItem(col, id){
+  const cfg = getManageListConfig(col);
+  return cfg ? cfg.list.find(i => i.id === id) : null;
+}
+function findManageLi(col, id){
+  const cfg = getManageListConfig(col);
+  return cfg ? cfg.container.querySelector(`li[data-id="${CSS.escape(id)}"]`) : null;
+}
+function enterEditMode(col, id){
+  const item = findManageItem(col, id);
+  const li = findManageLi(col, id);
+  if(!item || !li) return;
+  if(col === 'loaders'){
+    const options = cache.branches.map(b => `<option value="${escapeHtml(b.name)}" ${b.name === item.branch ? 'selected' : ''}>${escapeHtml(b.name)}</option>`).join('');
+    li.innerHTML = `
+      <span class="manage-edit-row">
+        <input type="text" class="edit-name-input" value="${escapeHtml(item.name)}">
+        <select class="edit-branch-input"><option value="">Sucursal...</option>${options}</select>
+        <button type="button" class="icon-btn save-edit-btn" data-col="${col}" data-id="${id}" title="Guardar">✔</button>
+        <button type="button" class="icon-btn cancel-edit-btn" data-col="${col}" data-id="${id}" title="Cancelar">✕</button>
+      </span>`;
+  } else {
+    li.innerHTML = `
+      <span class="manage-edit-row">
+        <input type="text" class="edit-name-input" value="${escapeHtml(item.name)}">
+        <button type="button" class="icon-btn save-edit-btn" data-col="${col}" data-id="${id}" title="Guardar">✔</button>
+        <button type="button" class="icon-btn cancel-edit-btn" data-col="${col}" data-id="${id}" title="Cancelar">✕</button>
+      </span>`;
+  }
+  const input = li.querySelector('.edit-name-input');
+  input.focus();
+  input.select();
+}
+function enterDeleteConfirm(col, id){
+  const item = findManageItem(col, id);
+  const li = findManageLi(col, id);
+  if(!item || !li) return;
+  li.innerHTML = `
+    <span class="manage-confirm">
+      ¿Eliminar a <strong>${escapeHtml(item.name)}</strong>? No afecta el historial ya registrado.
+      <button type="button" class="btn-yes confirm-delete-btn" data-col="${col}" data-id="${id}">Sí, eliminar</button>
+      <button type="button" class="btn-no cancel-delete-btn" data-col="${col}" data-id="${id}">Cancelar</button>
+    </span>`;
+}
+async function handleManageClick(e){
+  const t = e.target;
+  const col = t.dataset.col;
+  const id = t.dataset.id;
+  if(t.matches('.edit-btn')) enterEditMode(col, id);
+  else if(t.matches('.delete-btn')) enterDeleteConfirm(col, id);
+  else if(t.matches('.cancel-edit-btn') || t.matches('.cancel-delete-btn')) renderManageList(col);
+  else if(t.matches('.save-edit-btn')){
+    const li = findManageLi(col, id);
+    const newName = li.querySelector('.edit-name-input').value.trim();
+    if(!newName) return;
+    const updates = { name: newName };
+    if(col === 'loaders'){
+      const branchInput = li.querySelector('.edit-branch-input');
+      updates.branch = branchInput ? branchInput.value : '';
+    }
+    try{ await db.collection(col).doc(id).update(updates); }
+    catch(err){ showGlobalError('No se pudo guardar el cambio: ' + err.message); }
+  } else if(t.matches('.confirm-delete-btn')){
+    try{ await db.collection(col).doc(id).delete(); }
+    catch(err){ showGlobalError('No se pudo eliminar: ' + err.message); }
+  }
+}
+branchesManageList.addEventListener('click', handleManageClick);
+driversManageList.addEventListener('click', handleManageClick);
+loadersManageList.addEventListener('click', handleManageClick);
+
+addBranchForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = newBranchName.value.trim();
+  if(!name) return;
+  try{
+    await db.collection('branches').add({ name, createdAt: new Date().toISOString() });
+    newBranchName.value = '';
+    newBranchName.focus();
+  }catch(err){ showGlobalError('No se pudo agregar la sucursal: ' + err.message); }
+});
+addDriverForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = newDriverName.value.trim();
+  if(!name) return;
+  try{
+    await db.collection('drivers').add({ name, createdAt: new Date().toISOString() });
+    newDriverName.value = '';
+    newDriverName.focus();
+  }catch(err){ showGlobalError('No se pudo agregar el chofer: ' + err.message); }
+});
+addLoaderForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = newLoaderName.value.trim();
+  const branch = newLoaderBranch.value;
+  if(!name || !branch) return;
+  try{
+    await db.collection('loaders').add({ name, branch, createdAt: new Date().toISOString() });
+    newLoaderName.value = '';
+    newLoaderBranch.value = '';
+    newLoaderName.focus();
+  }catch(err){ showGlobalError('No se pudo agregar el encargado: ' + err.message); }
+});
+
+/* ---------------- Banners ---------------- */
+function showFieldError(input, errorEl, show){
+  errorEl.classList.toggle('show', show);
+  input.style.borderColor = show ? 'var(--red)' : '';
+}
+function showSuccessBanner(record){
+  bannerArea.innerHTML = `
+    <div class="banner banner-ok">
+      <div class="banner-icon">&#10003;</div>
+      <div class="banner-text">
+        <strong>Folio ${escapeHtml(record.folioDisplay)} cargado</strong><br>
+        Chofer: ${escapeHtml(record.driver)}${record.loadedBy ? ' &middot; Carg&oacute;: ' + escapeHtml(record.loadedBy) : ''}
+      </div>
+    </div>`;
+}
+function showDuplicateBanner(existing, attempt){
+  const branchTxt = existing.branch ? ` (Sucursal ${escapeHtml(existing.branch)})` : '';
+  bannerArea.innerHTML = `
+    <div class="banner banner-dup">
+      <div class="banner-stripe"></div>
+      <div class="banner-content">
+        <div class="banner-icon">&#9888;</div>
+        <div class="banner-text">
+          <strong>FOLIO ${escapeHtml(existing.folioDisplay)} YA FUE CARGADO</strong><br>
+          Se carg&oacute; originalmente con <strong>${escapeHtml(existing.driver)}</strong>${branchTxt} el ${fmtDateTime(existing.timestamp)}.<br>
+          Ahora <strong>${escapeHtml(attempt.driver)}</strong> intent&oacute; registrarlo otra vez. Este intento qued&oacute; anotado en el historial.
+        </div>
+      </div>
+    </div>`;
+}
+function showPendingBanner(existing){
+  const branchTxt = existing.branch ? ` (Sucursal ${escapeHtml(existing.branch)})` : '';
+  bannerArea.innerHTML = `
+    <div class="banner banner-pending">
+      <div class="banner-icon">📦</div>
+      <div class="banner-text">
+        <strong>Folio ${escapeHtml(existing.folioDisplay)} tiene entregas pendientes.</strong>${branchTxt}<br>
+        Baja para ver qu&eacute; productos faltan y marcar lo que se entrega ahora.
+      </div>
+    </div>`;
+}
+function showPendingSavedBanner(folioDisplay, count){
+  bannerArea.innerHTML = `
+    <div class="banner banner-ok">
+      <div class="banner-icon">&#10003;</div>
+      <div class="banner-text">
+        <strong>Faltante${count > 1 ? 's' : ''} guardado${count > 1 ? 's' : ''} correctamente</strong><br>
+        Se registr${count > 1 ? 'aron' : '&oacute;'} ${count} producto${count > 1 ? 's' : ''} pendiente${count > 1 ? 's' : ''} en el folio ${escapeHtml(folioDisplay)}.
+      </div>
+    </div>`;
+}
+function showDeliverySavedBanner(folioDisplay, closed){
+  bannerArea.innerHTML = `
+    <div class="banner banner-ok">
+      <div class="banner-icon">&#10003;</div>
+      <div class="banner-text">
+        <strong>Entrega registrada correctamente</strong><br>
+        ${closed
+          ? `El folio ${escapeHtml(folioDisplay)} qued&oacute; completo: ya no tiene productos pendientes.`
+          : `Se guard&oacute; la entrega del folio ${escapeHtml(folioDisplay)}. Todav&iacute;a quedan productos pendientes por entregar.`}
+      </div>
+    </div>`;
+}
+
+/* ---------------- Stats + pending notice ---------------- */
+function renderStats(){
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: TZ });
+  const branchVal = branchFilter.value;
+  let loadedToday = 0, voidToday = 0, attemptsToday = 0, incompleteToday = 0;
+  Object.values(cache.folios).forEach(rec => {
+    if(dayKey(rec.timestamp) !== today) return;
+    if(branchVal && rec.branch !== branchVal) return;
+    if(rec.status === 'cargado') loadedToday++;
+    if(rec.status === 'anulado') voidToday++;
+    if(rec.status === 'incompleto') incompleteToday++;
+    attemptsToday += (rec.attempts || []).length;
+  });
+  statsBar.innerHTML = `
+    <div class="stat"><span class="stat-num">${loadedToday}</span><span class="stat-label">Completos hoy</span></div>
+    <div class="stat ${incompleteToday > 0 ? 'stat-warn' : ''}"><span class="stat-num">${incompleteToday}</span><span class="stat-label">Incompletos hoy</span></div>
+    <div class="stat"><span class="stat-num">${voidToday}</span><span class="stat-label">Anulados hoy</span></div>
+    <div class="stat ${attemptsToday > 0 ? 'stat-alert' : ''}"><span class="stat-num">${attemptsToday}</span><span class="stat-label">Intentos duplicados hoy</span></div>`;
+  renderPendingNotice();
+}
+function renderPendingNotice(){
+  const count = Object.values(cache.folios).filter(r => r.status === 'incompleto').length;
+  if(count === 0){ pendingNotice.hidden = true; return; }
+  pendingNotice.hidden = false;
+  pendingNoticeText.textContent = count === 1
+    ? 'Hay 1 ticket con entrega pendiente por completar (todas las sucursales).'
+    : `Hay ${count} tickets con entregas pendientes por completar (todas las sucursales).`;
+}
+pendingNoticeBtn.addEventListener('click', () => {
+  pendingToggle.checked = true;
+  todayToggle.checked = false;
+  branchFilter.value = '';
+  searchInput.value = '';
+  renderStats();
+  renderHistory();
+  document.querySelector('.history-section').scrollIntoView({ behavior:'smooth', block:'start' });
+});
+
+/* ---------------- Pending items panel ---------------- */
+function findPendingItem(key, itemId){
+  const rec = cache.folios[key];
+  if(!rec) return null;
+  return (rec.pendingItems || []).find(it => it.id === itemId) || null;
+}
+function pendingItemRowHTML(key, item, confirming){
+  const rowId = `pendingItemRow-${key}-${item.id}`;
+  const delivered = item.status === 'entregado';
+
+  if(confirming){
+    return `
+      <div class="pending-item-row" id="${rowId}" data-folio="${key}" data-item="${item.id}">
+        <span class="pending-item-desc"><strong>${escapeHtml(item.description)}</strong> &mdash; faltan ${item.qty}</span>
+        <span class="manage-confirm">
+          &iquest;Quitar este producto faltante? (fue un error de captura)
+          <button type="button" class="btn-yes confirm-remove-pending-btn" data-folio="${key}" data-item="${item.id}">S&iacute;, quitar</button>
+          <button type="button" class="btn-no cancel-remove-pending-btn" data-folio="${key}" data-item="${item.id}">Cancelar</button>
+        </span>
+      </div>`;
+  }
+  if(delivered){
+    return `
+      <div class="pending-item-row item-delivered" id="${rowId}" data-folio="${key}" data-item="${item.id}">
+        <span class="pending-item-desc"><strong>${escapeHtml(item.description)}</strong> &mdash; entregado (${item.deliveredQty})${item.reason ? ` <span class="muted">(${escapeHtml(item.reason)})</span>` : ''}</span>
+      </div>`;
+  }
+  return `
+    <div class="pending-item-row" id="${rowId}" data-folio="${key}" data-item="${item.id}">
+      <label class="deliver-check-label">
+        <input type="checkbox" class="deliver-check" data-folio="${key}" data-item="${item.id}">
+        <span class="deliver-check-text">Entregar</span>
+      </label>
+      <span class="pending-item-desc"><strong>${escapeHtml(item.description)}</strong> &mdash; faltan ${item.qty}${item.reason ? ` <span class="muted">(${escapeHtml(item.reason)})</span>` : ''}</span>
+      <span class="deliver-qty-wrap">
+        <label class="deliver-qty-label" for="qty-${key}-${item.id}">Entregar ahora:</label>
+        <input type="number" class="deliver-qty" id="qty-${key}-${item.id}" min="1" max="${item.qty}" value="${item.qty}" data-folio="${key}" data-item="${item.id}" data-max="${item.qty}" disabled>
+        <span class="deliver-remaining-text" id="remaining-${key}-${item.id}">Quedar&aacute;n: ${item.qty}</span>
+      </span>
+      <button type="button" class="remove-pending-btn" data-folio="${key}" data-item="${item.id}">🗑 Quitar</button>
+    </div>`;
+}
+function addItemRowHTML(key, rowIdx){
+  return `
+    <div class="add-item-row" data-folio="${key}" data-row="${rowIdx}">
+      <input type="text" class="add-item-desc" placeholder="Producto faltante">
+      <input type="number" class="add-item-qty" placeholder="Cantidad" min="1">
+      <input type="text" class="add-item-reason" placeholder="Motivo (sin stock, cliente resguard&oacute;...)">
+      <button type="button" class="icon-btn remove-add-row-btn" data-folio="${key}" data-row="${rowIdx}" title="Quitar fila">✕</button>
+    </div>`;
+}
+function pendingPanelHTML(key, rec){
+  const items = rec.pendingItems || [];
+  const pendingOnes = items.filter(i => i.status === 'pendiente');
+  const deliveredOnes = items.filter(i => i.status === 'entregado');
+  const isVoid = rec.status === 'anulado';
+  const listHTML = pendingOnes.concat(deliveredOnes).map(it => pendingItemRowHTML(key, it, false)).join('') || `<div class="muted">Sin productos registrados todav&iacute;a.</div>`;
+  const driverOptions = '<option value="">Selecciona chofer...</option>' + cache.drivers.map(d => `<option value="${escapeHtml(d.name)}">${escapeHtml(d.name)}</option>`).join('');
+  const whoText = currentIdentity.name ? `${escapeHtml(currentIdentity.name)} (${escapeHtml(currentIdentity.branch)})` : '—';
+  return `
+    <div class="pending-panel" data-folio="${key}">
+      ${pendingOnes.length > 0 && !isVoid ? `<div class="pending-hint">Marca <strong>Entregar</strong> en los productos que se entregan hoy y ajusta la cantidad si es una entrega parcial. Luego presiona "Confirmar entrega seleccionada".</div>` : ''}
+      <div class="pending-list" id="pendingList-${key}">${listHTML}</div>
+      ${pendingOnes.length > 0 && !isVoid ? `
+      <div class="pending-deliver-controls">
+        <select class="deliver-driver" id="deliverDriver-${key}">${driverOptions}</select>
+        <span class="field-hint" style="margin:0;">Verifica: ${whoText}</span>
+        <button type="button" class="submit-btn deliver-confirm-btn" data-folio="${key}">Confirmar entrega seleccionada</button>
+      </div>
+      <div class="pending-error" id="deliverError-${key}">⚠️ Selecciona al menos un producto y un chofer.</div>
+      ` : ''}
+      ${!isVoid ? `
+      <div class="pending-add-form">
+        <h4>Agregar producto faltante</h4>
+        <div class="add-reported-row">
+          <span class="field-hint" style="margin:0;">Reporta: ${whoText}</span>
+        </div>
+        <div id="addItemsContainer-${key}" data-next-row="1">${addItemRowHTML(key, 0)}</div>
+        <div class="pending-add-actions">
+          <button type="button" class="ghost-btn add-another-row-btn" data-folio="${key}">+ Agregar otro producto</button>
+          <button type="button" class="submit-btn save-pending-btn" data-folio="${key}" style="width:auto; padding:9px 16px; font-size:13px;">Guardar faltantes</button>
+        </div>
+        <div class="pending-error" id="addError-${key}">⚠️ Completa descripci&oacute;n, cantidad y motivo de cada fila.</div>
+      </div>` : ''}
+    </div>`;
+}
+
+/* ---------------- History ---------------- */
+function renderAttempts(attempts){
+  return attempts.map(a => `
+    <div class="attempt-item">&#9888; <strong>${escapeHtml(a.driver)}</strong> intent&oacute; cargar este folio de nuevo el ${fmtDateTime(a.timestamp)}${a.loadedBy ? ' (registrado por ' + escapeHtml(a.loadedBy) + ')' : ''}</div>`).join('');
+}
+function rowHTML(key, rec){
+  const isVoid = rec.status === 'anulado';
+  const isPending = rec.status === 'incompleto';
+  const attemptsCount = (rec.attempts || []).length;
+  const pendingCount = (rec.pendingItems || []).filter(i => i.status === 'pendiente').length;
+
+  let statusChip;
+  if(isVoid) statusChip = `<span class="chip chip-void">Anulado</span>`;
+  else if(isPending) statusChip = `<span class="chip chip-pending">Incompleto (${pendingCount})</span>`;
+  else statusChip = `<span class="chip chip-ok">Completo</span>`;
+
+  const flag = attemptsCount > 0
+    ? `<button type="button" class="attempts-toggle" data-folio="${key}">&#9888; ${attemptsCount} intento${attemptsCount > 1 ? 's' : ''}</button>`
+    : `<span class="muted">&mdash;</span>`;
+
+  const pendingBtnLabel = isPending ? `📦 ${pendingCount} pendiente${pendingCount > 1 ? 's' : ''}` : '+ Marcar incompleto';
+  const pendingCell = isVoid
+    ? `<span class="muted">&mdash;</span>`
+    : `<button type="button" class="pending-toggle-btn" data-folio="${key}">${pendingBtnLabel}</button>`;
+
+  const actionCell = isVoid
+    ? `<span class="muted">${escapeHtml(rec.voidReason || '')}</span>`
+    : `<button type="button" class="void-btn" data-folio="${key}">Anular</button>`;
+
+  let extraRows = '';
+  if(attemptsCount > 0){
+    extraRows += `<tr class="attempts-row" id="attempts-${key}" hidden><td colspan="8"><div class="attempts-detail">${renderAttempts(rec.attempts)}</div></td></tr>`;
+  }
+  if(!isVoid){
+    extraRows += `<tr class="pending-row" id="pending-${key}" hidden><td colspan="8">${pendingPanelHTML(key, rec)}</td></tr>`;
+    extraRows += `
+      <tr class="void-row" id="voidform-${key}" hidden><td colspan="8">
+        <div class="void-form">
+          <input type="text" class="void-reason" data-folio="${key}" placeholder="Motivo de anulaci&oacute;n (ej. error de captura)">
+          <button type="button" class="void-confirm-btn" data-folio="${key}">Confirmar anulaci&oacute;n</button>
+          <button type="button" class="void-cancel-btn" data-folio="${key}">Cancelar</button>
+        </div>
+      </td></tr>`;
+  }
+
+  return `
+    <tr id="mainrow-${key}" class="${isVoid ? 'row-void' : ''} ${attemptsCount > 0 ? 'row-flagged' : ''} ${isPending ? 'row-pending' : ''}">
+      <td data-label="Folio"><span class="mono folio-tag">${escapeHtml(rec.folioDisplay)}</span></td>
+      <td data-label="Chofer">${escapeHtml(rec.driver)}</td>
+      <td data-label="Carg&oacute;">${escapeHtml(rec.loadedBy || '&mdash;')}${rec.branch ? ` <span class="branch-tag">${escapeHtml(rec.branch)}</span>` : ''}</td>
+      <td data-label="Hora" class="mono">${fmtDateTime(rec.timestamp)}</td>
+      <td data-label="Estado">${statusChip}</td>
+      <td data-label="Alertas">${flag}</td>
+      <td data-label="Pendientes">${pendingCell}</td>
+      <td data-label="Acci&oacute;n">${actionCell}</td>
+    </tr>
+    ${extraRows}`;
+}
+function getFilteredEntries(){
+  const term = searchInput.value.trim().toLowerCase();
+  const onlyToday = todayToggle.checked;
+  const onlyPending = pendingToggle.checked;
+  const branchVal = branchFilter.value;
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: TZ });
+  let entries = Object.entries(cache.folios);
+  entries = entries.filter(([key, rec]) => {
+    if(onlyToday && dayKey(rec.timestamp) !== today) return false;
+    if(onlyPending && rec.status !== 'incompleto') return false;
+    if(branchVal && rec.branch !== branchVal) return false;
+    if(term){
+      const hay = `${key} ${rec.driver} ${rec.loadedBy || ''} ${rec.folioDisplay}`.toLowerCase();
+      if(!hay.includes(term)) return false;
+    }
+    return true;
+  });
+  entries.sort((a, b) => new Date(b[1].timestamp) - new Date(a[1].timestamp));
+  return entries;
+}
+function renderHistory(){
+  const openPanels = Array.from(historyBody.querySelectorAll('tr.attempts-row:not([hidden]), tr.pending-row:not([hidden]), tr.void-row:not([hidden])')).map(tr => tr.id);
+  const limited = getFilteredEntries().slice(0, 200);
+  if(limited.length === 0){
+    historyBody.innerHTML = `<tr><td colspan="8"><div class="empty-state">No hay folios registrados con estos filtros todav&iacute;a.</div></td></tr>`;
+    return;
+  }
+  historyBody.innerHTML = limited.map(([key, rec]) => rowHTML(key, rec)).join('');
+  openPanels.forEach(id => { const panel = el(id); if(panel) panel.hidden = false; });
+}
+searchInput.addEventListener('input', renderHistory);
+todayToggle.addEventListener('change', renderHistory);
+pendingToggle.addEventListener('change', renderHistory);
+branchFilter.addEventListener('change', () => { renderStats(); renderHistory(); });
+
+async function handleHistoryClick(e){
+  const t = e.target;
+  if(t.matches('.attempts-toggle')){
+    const row = el('attempts-' + t.dataset.folio);
+    if(row) row.hidden = !row.hidden;
+  } else if(t.matches('.pending-toggle-btn')){
+    const row = el('pending-' + t.dataset.folio);
+    if(row) row.hidden = !row.hidden;
+  } else if(t.matches('.void-btn')){
+    const row = el('voidform-' + t.dataset.folio);
+    if(row) row.hidden = false;
+  } else if(t.matches('.void-cancel-btn')){
+    const row = el('voidform-' + t.dataset.folio);
+    if(row) row.hidden = true;
+  } else if(t.matches('.void-confirm-btn')){
+    const key = t.dataset.folio;
+    const input = document.querySelector(`.void-reason[data-folio="${CSS.escape(key)}"]`);
+    const reason = (input && input.value.trim()) || 'Sin motivo especificado';
+    try{
+      await db.collection('folios').doc(key).update({ status: 'anulado', voidReason: reason, voidedAt: new Date().toISOString() });
+    }catch(err){ showGlobalError('No se pudo anular: ' + err.message); }
+  } else if(t.matches('.add-another-row-btn')){
+    const key = t.dataset.folio;
+    const container = el('addItemsContainer-' + key);
+    const nextRow = parseInt(container.dataset.nextRow, 10);
+    container.insertAdjacentHTML('beforeend', addItemRowHTML(key, nextRow));
+    container.dataset.nextRow = nextRow + 1;
+  } else if(t.matches('.remove-add-row-btn')){
+    const key = t.dataset.folio;
+    const row = t.closest('.add-item-row');
+    const container = el('addItemsContainer-' + key);
+    if(container.children.length > 1) row.remove();
+    else row.querySelectorAll('input').forEach(i => { i.value = ''; });
+  } else if(t.matches('.save-pending-btn')){
+    const key = t.dataset.folio;
+    if(savingPending.has(key)) return;
+    const container = el('addItemsContainer-' + key);
+    const rows = Array.from(container.querySelectorAll('.add-item-row'));
+    const draftItems = [];
+    let hasInvalid = false;
+    rows.forEach(row => {
+      const desc = row.querySelector('.add-item-desc').value.trim();
+      const qtyStr = row.querySelector('.add-item-qty').value.trim();
+      const reason = row.querySelector('.add-item-reason').value.trim();
+      if(!desc && !qtyStr && !reason) return;
+      const qty = parseInt(qtyStr, 10);
+      if(!desc || !qty || qty <= 0 || !reason){ hasInvalid = true; return; }
+      draftItems.push({ description: desc, qty, reason });
+    });
+    const errEl = el('addError-' + key);
+    if(hasInvalid || draftItems.length === 0){ errEl.classList.add('show'); return; }
+    errEl.classList.remove('show');
+    savingPending.add(key);
+    t.disabled = true;
+    const originalLabel = t.textContent;
+    t.textContent = 'Guardando...';
+    try{
+      await addPendingItems(key, draftItems);
+      const display = cache.folios[key] ? cache.folios[key].folioDisplay : key;
+      showPendingSavedBanner(display, draftItems.length);
+    }catch(err){
+      showGlobalError('No se pudo guardar el faltante: ' + err.message);
+    } finally {
+      savingPending.delete(key);
+      if(document.body.contains(t)){ t.disabled = false; t.textContent = originalLabel; }
+    }
+  } else if(t.matches('.remove-pending-btn')){
+    const key = t.dataset.folio;
+    const itemId = t.dataset.item;
+    const item = findPendingItem(key, itemId);
+    const rowEl = el('pendingItemRow-' + key + '-' + itemId);
+    if(item && rowEl) rowEl.outerHTML = pendingItemRowHTML(key, item, true);
+  } else if(t.matches('.cancel-remove-pending-btn')){
+    const key = t.dataset.folio;
+    const itemId = t.dataset.item;
+    const item = findPendingItem(key, itemId);
+    const rowEl = el('pendingItemRow-' + key + '-' + itemId);
+    if(item && rowEl) rowEl.outerHTML = pendingItemRowHTML(key, item, false);
+  } else if(t.matches('.confirm-remove-pending-btn')){
+    const key = t.dataset.folio;
+    const itemId = t.dataset.item;
+    const item = findPendingItem(key, itemId);
+    const desc = item ? item.description : '';
+    try{
+      await removePendingItem(key, itemId);
+      const display = cache.folios[key] ? cache.folios[key].folioDisplay : key;
+      bannerArea.innerHTML = `
+        <div class="banner banner-ok">
+          <div class="banner-icon">&#10003;</div>
+          <div class="banner-text">
+            <strong>Producto quitado correctamente</strong><br>
+            ${desc ? `"${escapeHtml(desc)}" se quit&oacute;` : 'El producto se quit&oacute;'} del folio ${escapeHtml(display)}.
+          </div>
+        </div>`;
+    }catch(err){ showGlobalError('No se pudo quitar el producto: ' + err.message); }
+  } else if(t.matches('.deliver-confirm-btn')){
+    const key = t.dataset.folio;
+    if(deliveringFolios.has(key)) return;
+    const checks = Array.from(document.querySelectorAll(`.deliver-check[data-folio="${CSS.escape(key)}"]:checked`));
+    const driverSel = el('deliverDriver-' + key);
+    const driver = driverSel ? driverSel.value : '';
+    const errEl = el('deliverError-' + key);
+    if(checks.length === 0 || !driver){ errEl.classList.add('show'); return; }
+    errEl.classList.remove('show');
+    const selections = checks.map(chk => {
+      const itemId = chk.dataset.item;
+      const qtyInput = document.querySelector(`.deliver-qty[data-folio="${CSS.escape(key)}"][data-item="${CSS.escape(itemId)}"]`);
+      return { itemId, qtyNow: parseInt(qtyInput.value, 10) || 1 };
+    });
+    deliveringFolios.add(key);
+    t.disabled = true;
+    const originalLabel = t.textContent;
+    t.textContent = 'Guardando...';
+    try{
+      const result = await deliverPendingItems(key, selections, driver);
+      const display = cache.folios[key] ? cache.folios[key].folioDisplay : key;
+      showDeliverySavedBanner(display, result.closed);
+    }catch(err){
+      showGlobalError('No se pudo registrar la entrega: ' + err.message);
+    } finally {
+      deliveringFolios.delete(key);
+      if(document.body.contains(t)){ t.disabled = false; t.textContent = originalLabel; }
+    }
+  }
+}
+historyBody.addEventListener('click', handleHistoryClick);
+
+function computeRemainingQty(typedValue, maxQty){
+  let n = parseInt(typedValue, 10);
+  if(isNaN(n)) n = 1;
+  const qtyNow = Math.min(Math.max(1, n), maxQty);
+  return maxQty - qtyNow;
+}
+function updateRemainingText(input){
+  const key = input.dataset.folio;
+  const itemId = input.dataset.item;
+  const maxQty = parseInt(input.dataset.max, 10);
+  const remainEl = el('remaining-' + key + '-' + itemId);
+  if(remainEl) remainEl.textContent = `Quedar\u00e1n: ${computeRemainingQty(input.value, maxQty)}`;
+}
+historyBody.addEventListener('input', (e) => {
+  if(e.target.matches('.deliver-qty')) updateRemainingText(e.target);
+});
+historyBody.addEventListener('change', (e) => {
+  if(!e.target.matches('.deliver-check')) return;
+  const key = e.target.dataset.folio;
+  const itemId = e.target.dataset.item;
+  const qtyInput = el('qty-' + key + '-' + itemId);
+  const remainEl = el('remaining-' + key + '-' + itemId);
+  if(!qtyInput) return;
+  qtyInput.disabled = !e.target.checked;
+  if(e.target.checked){
+    qtyInput.value = qtyInput.dataset.max;
+    updateRemainingText(qtyInput);
+    qtyInput.focus();
+  } else if(remainEl){
+    remainEl.textContent = `Quedar\u00e1n: ${qtyInput.dataset.max}`;
+  }
+});
+
+function openPendingPanelForFolio(folioKey, prefill){
+  todayToggle.checked = false;
+  pendingToggle.checked = false;
+  searchInput.value = '';
+  renderHistory();
+  requestAnimationFrame(() => {
+    const panelRow = el('pending-' + folioKey);
+    const mainRow = el('mainrow-' + folioKey);
+    if(panelRow) panelRow.hidden = false;
+    if(prefill){
+      const driverSel = el('deliverDriver-' + folioKey);
+      if(driverSel && prefill.driver) driverSel.value = prefill.driver;
+    }
+    if(mainRow) mainRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+}
+
+/* ---------------- Pending items: Firestore ops ---------------- */
+async function addPendingItems(folioKey, draftItems){
+  const ref = db.collection('folios').doc(folioKey);
+  const now = new Date().toISOString();
+  const reportedBy = currentIdentity.name;
+  const newItems = draftItems.map(d => ({
+    id: 'item_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+    description: d.description,
+    qty: d.qty,
+    reason: d.reason,
+    reportedBy: reportedBy || '',
+    addedAt: now,
+    status: 'pendiente'
+  }));
+  await ref.update({
+    status: 'incompleto',
+    pendingItems: firebase.firestore.FieldValue.arrayUnion(...newItems)
+  });
+}
+async function removePendingItem(folioKey, itemId){
+  const ref = db.collection('folios').doc(folioKey);
+  return db.runTransaction(async (tx) => {
+    const doc = await tx.get(ref);
+    if(!doc.exists) return;
+    const data = doc.data();
+    const items = (data.pendingItems || []).filter(it => !(it.id === itemId && it.status === 'pendiente'));
+    const stillPending = items.some(it => it.status === 'pendiente');
+    const newStatus = data.status === 'anulado' ? 'anulado' : (stillPending ? 'incompleto' : 'cargado');
+    tx.update(ref, { pendingItems: items, status: newStatus });
+  });
+}
+async function deliverPendingItems(folioKey, selections, driver){
+  const ref = db.collection('folios').doc(folioKey);
+  const now = new Date().toISOString();
+  const loadedBy = currentIdentity.name;
+  return db.runTransaction(async (tx) => {
+    const doc = await tx.get(ref);
+    if(!doc.exists) throw new Error('El folio ya no existe.');
+    const data = doc.data();
+    const items = (data.pendingItems || []).map(it => ({ ...it }));
+    const deliveredNow = [];
+    selections.forEach(sel => {
+      const item = items.find(it => it.id === sel.itemId && it.status === 'pendiente');
+      if(!item) return;
+      const qtyNow = Math.min(Math.max(1, sel.qtyNow), item.qty);
+      deliveredNow.push({ description: item.description, qty: qtyNow });
+      if(qtyNow >= item.qty){
+        item.status = 'entregado';
+        item.deliveredAt = now;
+        item.deliveredQty = item.qty;
+      } else {
+        item.qty = item.qty - qtyNow;
+        item.partialDeliveries = (item.partialDeliveries || []).concat([{ qty: qtyNow, timestamp: now, driver, loadedBy }]);
+      }
+    });
+    const stillPending = items.some(it => it.status === 'pendiente');
+    const newStatus = stillPending ? 'incompleto' : 'cargado';
+    const rounds = (data.deliveryRounds || []).concat([{ timestamp: now, driver, loadedBy, items: deliveredNow }]);
+    tx.update(ref, { pendingItems: items, status: newStatus, deliveryRounds: rounds });
+    return { closed: !stillPending, items: deliveredNow };
+  });
+}
+
+/* ---------------- Register folio (transaction) ---------------- */
+async function registerFolio(folioRaw, driver){
+  const folioKey = folioRaw.trim().toUpperCase().replace(/\//g, '-');
+  const ref = db.collection('folios').doc(folioKey);
+  const now = new Date().toISOString();
+  const loadedBy = currentIdentity.name;
+  const branch = currentIdentity.branch;
+  return db.runTransaction(async (tx) => {
+    const doc = await tx.get(ref);
+    if(doc.exists && doc.data().status === 'cargado'){
+      const existing = doc.data();
+      const attempts = existing.attempts ? existing.attempts.slice() : [];
+      attempts.push({ driver, loadedBy, branch, timestamp: now });
+      tx.update(ref, { attempts });
+      return { type: 'duplicate', existing, attempt: { driver, loadedBy, branch, timestamp: now } };
+    } else if(doc.exists && doc.data().status === 'incompleto'){
+      return { type: 'pending', existing: doc.data(), folioKey };
+    } else {
+      const record = {
+        folioDisplay: folioRaw.trim(),
+        driver, loadedBy, branch,
+        timestamp: now,
+        status: 'cargado',
+        voidReason: null,
+        voidedAt: null,
+        attempts: [],
+        pendingItems: [],
+        deliveryRounds: []
+      };
+      tx.set(ref, record);
+      return { type: 'success', record, folioKey };
+    }
+  });
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const folioRaw = folioInput.value.trim();
+  const driver = driverSelect.value;
+  showFieldError(folioInput, folioError, false);
+  showFieldError(driverSelect, driverError, false);
+  let hasError = false;
+  if(!folioRaw){ showFieldError(folioInput, folioError, true); hasError = true; }
+  if(!driver){ showFieldError(driverSelect, driverError, true); hasError = true; }
+  if(hasError) return;
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Registrando...';
+  try{
+    const result = await registerFolio(folioRaw, driver);
+    if(result.type === 'duplicate'){
+      showDuplicateBanner(result.existing, result.attempt);
+    } else if(result.type === 'pending'){
+      showPendingBanner(result.existing);
+      openPendingPanelForFolio(result.folioKey, { driver });
+    } else {
+      showSuccessBanner(result.record);
+    }
+    folioInput.value = '';
+    folioInput.focus();
+  }catch(err){
+    showGlobalError('No se pudo registrar la carga: ' + err.message);
+  }
+  submitBtn.disabled = false;
+  submitBtn.textContent = 'Registrar carga';
+});
+
+/* ---------------- CSV export & cleanup ---------------- */
+function csvField(value){
+  const s = String(value ?? '');
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+function summarizePending(items){
+  return (items || []).filter(i => i.status === 'pendiente')
+    .map(i => `${i.description} (faltan ${i.qty}, ${i.reason || 'sin motivo'})`).join(' | ');
+}
+function exportCSV(){
+  const rows = [['Folio','Chofer','Cargo','Sucursal','Fecha','Hora','Estado','MotivoAnulacion','PendientesActuales','IntentosDuplicados','DetalleIntentos']];
+  Object.entries(cache.folios)
+    .sort((a, b) => new Date(b[1].timestamp) - new Date(a[1].timestamp))
+    .forEach(([key, rec]) => {
+      const d = new Date(rec.timestamp);
+      const fecha = d.toLocaleDateString('es-MX', { timeZone: TZ });
+      const hora = d.toLocaleTimeString('es-MX', { timeZone: TZ });
+      const attempts = (rec.attempts || []).map(a => `${a.driver} @ ${fmtDateTime(a.timestamp)}`).join(' | ');
+      rows.push([rec.folioDisplay, rec.driver, rec.loadedBy || '', rec.branch || '', fecha, hora, rec.status, rec.voidReason || '', summarizePending(rec.pendingItems), (rec.attempts || []).length, attempts]);
+    });
+  const csv = rows.map(r => r.map(csvField).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `control-carga-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+exportBtn.addEventListener('click', exportCSV);
+
+function statusLabel(rec){
+  if(rec.status === 'anulado') return 'Anulado';
+  if(rec.status === 'incompleto') return 'Incompleto';
+  return 'Completo';
+}
+
+function buildTimeline(rec){
+  const events = [];
+  (rec.pendingItems || []).forEach(item => {
+    events.push({
+      timestamp: item.addedAt,
+      icon: '📦',
+      label: 'Faltante reportado',
+      text: `${item.description} — faltan ${item.qty}${item.reason ? ' · motivo: ' + item.reason : ''}`,
+      by: item.reportedBy ? `Report\u00f3: ${item.reportedBy}` : ''
+    });
+  });
+  (rec.deliveryRounds || []).forEach(round => {
+    const itemsTxt = (round.items || []).map(i => `${i.description} (${i.qty})`).join(', ');
+    events.push({
+      timestamp: round.timestamp,
+      icon: '🚚',
+      label: 'Entrega registrada',
+      text: itemsTxt || '—',
+      by: [round.driver, round.loadedBy].filter(Boolean).join(' / ')
+    });
+  });
+  events.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  return events;
+}
+
+function exportPDF(){
+  if(!window.jspdf || !window.jspdf.jsPDF){
+    showGlobalError('No se pudo cargar el generador de PDF. Revisa tu conexión a internet e intenta de nuevo.');
+    return;
+  }
+  const entries = getFilteredEntries();
+  if(entries.length === 0){
+    showGlobalError('No hay folios para exportar con los filtros actuales.');
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.text('Control de Carga · Historial de Folios', 40, 40);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  const filtros = [];
+  if(todayToggle.checked) filtros.push('Solo hoy');
+  if(pendingToggle.checked) filtros.push('Solo con faltantes');
+  if(branchFilter.value) filtros.push(`Sucursal: ${branchFilter.value}`);
+  if(searchInput.value.trim()) filtros.push(`Búsqueda: "${searchInput.value.trim()}"`);
+  const filtroTexto = filtros.length ? filtros.join(' · ') : 'Todos los registros';
+  const generado = new Date().toLocaleString('es-MX', { timeZone: TZ, dateStyle: 'long', timeStyle: 'short' });
+  doc.text(`Filtro aplicado: ${filtroTexto}`, 40, 58);
+  doc.text(`Generado: ${generado}`, 40, 72);
+
+  let completos = 0, incompletos = 0, anulados = 0, intentos = 0;
+  entries.forEach(([key, rec]) => {
+    if(rec.status === 'cargado') completos++;
+    if(rec.status === 'incompleto') incompletos++;
+    if(rec.status === 'anulado') anulados++;
+    intentos += (rec.attempts || []).length;
+  });
+  doc.text(`Total: ${entries.length}   ·   Completos: ${completos}   ·   Incompletos: ${incompletos}   ·   Anulados: ${anulados}   ·   Intentos duplicados: ${intentos}`, 40, 90);
+
+  const tableRows = entries.map(([key, rec]) => {
+    const d = new Date(rec.timestamp);
+    const fecha = d.toLocaleDateString('es-MX', { timeZone: TZ });
+    const hora = d.toLocaleTimeString('es-MX', { timeZone: TZ, hour:'2-digit', minute:'2-digit' });
+    const pendingCount = (rec.pendingItems || []).filter(i => i.status === 'pendiente').length;
+    const attemptsCount = (rec.attempts || []).length;
+    return [
+      rec.folioDisplay,
+      rec.driver,
+      rec.loadedBy || '—',
+      rec.branch || '—',
+      `${fecha} ${hora}`,
+      statusLabel(rec),
+      pendingCount > 0 ? `${pendingCount} producto(s)` : '—',
+      attemptsCount > 0 ? `${attemptsCount}` : '—',
+      rec.status === 'anulado' ? (rec.voidReason || '') : ''
+    ];
+  });
+
+  doc.autoTable({
+    startY: 104,
+    head: [['Folio','Chofer','Cargó','Sucursal','Fecha y hora','Estado','Faltantes','Intentos dup.','Motivo anulación']],
+    body: tableRows,
+    styles: { fontSize: 8, cellPadding: 4 },
+    headStyles: { fillColor: [42, 36, 28] },
+    alternateRowStyles: { fillColor: [247, 242, 228] },
+    margin: { left: 40, right: 40 }
+  });
+
+  const pendingEntries = entries.filter(([key, rec]) => (rec.pendingItems || []).some(i => i.status === 'pendiente'));
+  if(pendingEntries.length > 0){
+    let y = doc.lastAutoTable.finalY + 26;
+    if(y > doc.internal.pageSize.getHeight() - 100){ doc.addPage(); y = 40; }
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.text('Detalle de productos pendientes por entregar', 40, y);
+
+    const detailRows = [];
+    pendingEntries.forEach(([key, rec]) => {
+      (rec.pendingItems || []).filter(i => i.status === 'pendiente').forEach(item => {
+        detailRows.push([rec.folioDisplay, item.description, String(item.qty), item.reason || '—']);
+      });
+    });
+    doc.autoTable({
+      startY: y + 12,
+      head: [['Folio','Producto','Cantidad faltante','Motivo']],
+      body: detailRows,
+      styles: { fontSize: 8, cellPadding: 4 },
+      headStyles: { fillColor: [184, 66, 10] },
+      alternateRowStyles: { fillColor: [255, 246, 221] },
+      margin: { left: 40, right: 40 }
+    });
+  }
+
+  if(detailToggle.checked){
+    const movementEntries = entries
+      .map(([key, rec]) => [key, rec, buildTimeline(rec)])
+      .filter(([key, rec, events]) => events.length > 0);
+
+    if(movementEntries.length > 0){
+      doc.addPage();
+      let y = 40;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text('Detalle de entregas — movimientos por ticket', 40, y);
+      y += 10;
+
+      movementEntries.forEach(([key, rec, events]) => {
+        const pageHeight = doc.internal.pageSize.getHeight();
+        if(y > pageHeight - 90){ doc.addPage(); y = 40; }
+        y += 18;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.text(`Folio ${rec.folioDisplay}  ·  Chofer original: ${rec.driver}  ·  Estado actual: ${statusLabel(rec)}`, 40, y);
+
+        const body = events.map(ev => {
+          const d = new Date(ev.timestamp);
+          const fechaHora = d.toLocaleString('es-MX', { timeZone: TZ, day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+          return [ev.label, fechaHora, ev.text, ev.by || '—'];
+        });
+        doc.autoTable({
+          startY: y + 8,
+          head: [['Evento','Fecha y hora','Detalle','Responsable']],
+          body,
+          styles: { fontSize: 8, cellPadding: 3 },
+          headStyles: { fillColor: [63, 83, 102] },
+          margin: { left: 40, right: 40 }
+        });
+        y = doc.lastAutoTable.finalY + 8;
+      });
+    }
+  }
+
+  doc.save(`control-carga-${new Date().toISOString().slice(0,10)}.pdf`);
+}
+exportPdfBtn.addEventListener('click', exportPDF);
+cleanupBtn.addEventListener('click', () => cleanupConfirm.classList.toggle('show'));
+cleanupCancelBtn.addEventListener('click', () => cleanupConfirm.classList.remove('show'));
+cleanupConfirmBtn.addEventListener('click', async () => {
+  exportCSV();
+  const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  const toDelete = Object.entries(cache.folios).filter(([key, rec]) => rec.status !== 'incompleto' && new Date(rec.timestamp).getTime() < cutoff);
+  try{
+    for(let i = 0; i < toDelete.length; i += 400){
+      const batch = db.batch();
+      toDelete.slice(i, i + 400).forEach(([key]) => batch.delete(db.collection('folios').doc(key)));
+      await batch.commit();
+    }
+    cleanupConfirm.classList.remove('show');
+    maintMsg.textContent = 'Listo: respaldo CSV descargado y registros antiguos archivados.';
+    setTimeout(() => { maintMsg.textContent = ''; }, 6000);
+  }catch(err){
+    showGlobalError('No se pudo archivar: ' + err.message);
+  }
+});
+
+/* ---------------- Clock ---------------- */
+function updateClock(){
+  const now = new Date();
+  clockDisplay.textContent = now.toLocaleString('es-MX', { timeZone: TZ, weekday:'short', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+}
+
+boot();
+</script>
+</body>
+</html>
