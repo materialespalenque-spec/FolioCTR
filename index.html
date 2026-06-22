@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Control de Carga · Folios</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#2A241C">
@@ -37,6 +37,15 @@ body{
   font-family:'Inter', sans-serif;
   -webkit-font-smoothing:antialiased;
   min-height:100vh;
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+}
+/* Forzar que en modo PWA standalone se comporte como móvil */
+@media (display-mode: standalone){
+  body{ font-size:16px; }
+  .field input, .field select,
+  .overlay-card input, .overlay-card select,
+  .history-controls input, .history-controls select{ font-size:16px !important; }
 }
 .mono{ font-family:'JetBrains Mono', monospace; }
 @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
