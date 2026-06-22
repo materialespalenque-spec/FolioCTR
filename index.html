@@ -224,7 +224,7 @@ a{ color: var(--steel); }
 .history-controls input[type="text"]{ flex:1; min-width:160px; padding:10px 12px; font-size:14px; border:2px solid var(--border); border-radius:8px; font-family:'Inter'; background: var(--paper-card); }
 .history-controls input[type="text"]:focus-visible{ outline:3px solid var(--steel-light); border-color: var(--steel); }
 .history-controls select{ padding:10px 12px; font-size:14px; border:2px solid var(--border); border-radius:8px; font-family:'Inter'; background: var(--paper-card); }
-.toggle-label{ display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color: var(--steel); white-space:nowrap; cursor:pointer; }
+.toggle-label{ display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color: var(--steel); cursor:pointer; }
 
 .table-wrap{ background: var(--paper-card); border:2px solid var(--border); border-radius: var(--radius); overflow:hidden; }
 table{ width:100%; border-collapse:collapse; }
@@ -296,8 +296,9 @@ tbody tr.row-void td{ color: var(--muted); }
   table, tbody, tr, td{ display:block; width:100%; }
   tbody tr{ border-bottom:2px solid var(--border); padding:10px 0; }
   tbody tr.attempts-row, tbody tr.void-row, tbody tr.pending-row{ padding:0; }
-  tbody td{ border-bottom:none; padding:6px 14px; display:flex; justify-content:space-between; gap:10px; font-size:15px; }
-  tbody td::before{ content: attr(data-label); font-size:12px; text-transform:uppercase; font-weight:700; color: var(--muted); flex-shrink:0; }
+  tbody td{ border-bottom:none; padding:6px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:15px; flex-wrap:wrap; }
+  tbody td::before{ content: attr(data-label); font-size:12px; text-transform:uppercase; font-weight:700; color: var(--muted); flex-shrink:0; min-width:90px; }
+  tbody td > *{ flex:1; text-align:right; }
 
   /* Topbar compacto pero legible */
   .topbar{ flex-wrap:wrap; gap:8px; padding:12px 14px; }
@@ -346,6 +347,15 @@ tbody tr.row-void td{ color: var(--muted); }
 
   /* Botones de acción en la tabla */
   .action-btn{ font-size:13px; padding:8px 12px; }
+  /* Celdas con botones: en columna para no desbordarse */
+  tbody td[data-label="Acción"],
+  tbody td[data-label="Acci\00f3n"]{ flex-direction:column; align-items:flex-start; gap:6px; }
+  tbody td[data-label="Acción"] > *,
+  tbody td[data-label="Acci\00f3n"] > *{ text-align:left; }
+  /* Folio tag no se corta */
+  .folio-tag{ word-break:break-all; }
+  /* Botones de acción ancho completo en móvil */
+  .action-btn{ width:100%; text-align:center; }
 
   /* Panel de faltantes */
   .pending-panel{ padding:14px; }
@@ -552,8 +562,8 @@ tbody tr.row-void td{ color: var(--muted); }
     <button type="button" class="ghost-btn" id="cleanupBtn">Archivar registros de hace más de 30 días</button>
     <span class="maint-msg" id="maintMsg"></span>
   </div>
-  <label class="toggle-label" style="margin-top:6px; margin-bottom:8px; display:inline-flex;">
-    <input type="checkbox" id="detailToggle"> 📋 Incluir "Detalles de entregas" (movimientos) en el PDF
+  <label class="toggle-label" style="margin-top:6px; margin-bottom:8px; display:flex; flex-wrap:wrap; align-items:flex-start; gap:6px;">
+    <input type="checkbox" id="detailToggle" style="flex-shrink:0; margin-top:3px;"> <span>📋 Incluir "Detalles de entregas" (movimientos) en el PDF</span>
   </label>
   <p class="footnote" id="pdfHint">El PDF respeta los filtros que tengas activos arriba (Solo hoy / Solo con faltantes / búsqueda) — útil para generar un reporte de un día, de un chofer, o de todos los pendientes. Activa "Detalles de entregas" para agregar el historial completo de cómo se fue resolviendo cada ticket incompleto: quién reportó el faltante y quién entregó cada parte, con fecha y hora.</p>
   <div class="cleanup-confirm" id="cleanupConfirm">
