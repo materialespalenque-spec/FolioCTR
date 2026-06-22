@@ -4,10 +4,10 @@ const CACHE_NAME = 'control-carga-v1';
 
 // Archivos de la app que se guardan en caché para funcionar sin internet
 const APP_SHELL = [
-  '/index.html',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png',
+  '/FolioCTR/index.html',
+  '/FolioCTR/manifest.json',
+  '/FolioCTR/icon-192.png',
+  '/FolioCTR/icon-512.png',
   // Fuentes y librerías externas
   'https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js',
