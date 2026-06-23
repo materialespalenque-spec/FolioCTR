@@ -296,6 +296,20 @@ tbody tr.row-void td{ color: var(--muted); }
   table, tbody, tr, td{ display:block; width:100%; }
   tbody tr{ border-bottom:2px solid var(--border); padding:10px 0; }
   tbody tr.attempts-row, tbody tr.void-row, tbody tr.pending-row{ padding:0; }
+  tbody tr.attempts-row td,
+  tbody tr.void-row td,
+  tbody tr.pending-row td{
+    padding:0 !important;
+    display:block !important;
+    width:100% !important;
+    box-sizing:border-box;
+  }
+  tbody tr.attempts-row td::before,
+  tbody tr.void-row td::before,
+  tbody tr.pending-row td::before{ display:none !important; }
+  .pending-panel{ margin:0; border-radius:0; border-left:none; border-right:none; width:100%; box-sizing:border-box; }
+  .pending-hint{ text-align:left; }
+  .pending-item-row{ width:100%; box-sizing:border-box; }
   tbody td{ border-bottom:none; padding:6px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:15px; flex-wrap:wrap; }
   tbody td::before{ content: attr(data-label); font-size:12px; text-transform:uppercase; font-weight:700; color: var(--muted); flex-shrink:0; min-width:90px; }
   tbody td > *{ flex:1; text-align:right; }
