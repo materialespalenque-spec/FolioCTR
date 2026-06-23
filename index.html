@@ -1045,18 +1045,15 @@ function showDeliverySavedBanner(folioDisplay, closed){
 
 /* ---------------- Stats + pending notice ---------------- */
 function lastActionDate(rec){
-  // Devuelve la fecha más reciente de actividad según el estado del folio
-  if(rec.status === 'anulado'){
-    return rec.voidedAt || rec.timestamp;
-  }
+  // statusUpdatedAt es la fuente más precisa — se guarda en cada cambio de estado
+  if(rec.statusUpdatedAt) return rec.statusUpdatedAt;
+  // Fallback para folios anteriores que no tienen ese campo
+  if(rec.status === 'anulado') return rec.voidedAt || rec.timestamp;
   if(rec.status === 'cargado'){
-    // Si se cerró desde incompleto, la última ronda de entrega es la fecha de cierre
     const rounds = rec.deliveryRounds || [];
     if(rounds.length > 0) return rounds[rounds.length - 1].timestamp;
-    return rec.timestamp;
   }
   if(rec.status === 'incompleto'){
-    // La actividad más reciente: último producto reportado o última entrega parcial
     const dates = [rec.timestamp];
     (rec.pendingItems || []).forEach(item => { if(item.addedAt) dates.push(item.addedAt); });
     (rec.deliveryRounds || []).forEach(round => { if(round.timestamp) dates.push(round.timestamp); });
@@ -1308,7 +1305,7 @@ async function handleHistoryClick(e){
     const input = document.querySelector(`.void-reason[data-folio="${CSS.escape(key)}"]`);
     const reason = (input && input.value.trim()) || 'Sin motivo especificado';
     try{
-      await db.collection('folios').doc(key).update({ status: 'anulado', voidReason: reason, voidedAt: new Date().toISOString() });
+      await db.collection('folios').doc(key).update({ status: 'anulado', voidReason: reason, voidedAt: new Date().toISOString(), statusUpdatedAt: new Date().toISOString() });
     }catch(err){ showGlobalError('No se pudo anular: ' + err.message); }
   } else if(t.matches('.add-another-row-btn')){
     const key = t.dataset.folio;
@@ -1482,6 +1479,7 @@ async function addPendingItems(folioKey, draftItems){
   }));
   await ref.update({
     status: 'incompleto',
+    statusUpdatedAt: now,
     pendingItems: firebase.firestore.FieldValue.arrayUnion(...newItems)
   });
 }
@@ -1494,7 +1492,7 @@ async function removePendingItem(folioKey, itemId){
     const items = (data.pendingItems || []).filter(it => !(it.id === itemId && it.status === 'pendiente'));
     const stillPending = items.some(it => it.status === 'pendiente');
     const newStatus = data.status === 'anulado' ? 'anulado' : (stillPending ? 'incompleto' : 'cargado');
-    tx.update(ref, { pendingItems: items, status: newStatus });
+    tx.update(ref, { pendingItems: items, status: newStatus, statusUpdatedAt: new Date().toISOString() });
   });
 }
 async function deliverPendingItems(folioKey, selections, driver){
@@ -1524,7 +1522,7 @@ async function deliverPendingItems(folioKey, selections, driver){
     const stillPending = items.some(it => it.status === 'pendiente');
     const newStatus = stillPending ? 'incompleto' : 'cargado';
     const rounds = (data.deliveryRounds || []).concat([{ timestamp: now, driver, loadedBy, items: deliveredNow }]);
-    tx.update(ref, { pendingItems: items, status: newStatus, deliveryRounds: rounds });
+    tx.update(ref, { pendingItems: items, status: newStatus, statusUpdatedAt: now, deliveryRounds: rounds });
     return { closed: !stillPending, items: deliveredNow };
   });
 }
@@ -1551,6 +1549,7 @@ async function registerFolio(folioRaw, driver){
         folioDisplay: folioRaw.trim(),
         driver, loadedBy, branch,
         timestamp: now,
+        statusUpdatedAt: now,
         status: 'cargado',
         voidReason: null,
         voidedAt: null,
