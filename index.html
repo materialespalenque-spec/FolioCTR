@@ -1044,23 +1044,42 @@ function showDeliverySavedBanner(folioDisplay, closed){
 }
 
 /* ---------------- Stats + pending notice ---------------- */
+function lastActionDate(rec){
+  // Devuelve la fecha más reciente de actividad según el estado del folio
+  if(rec.status === 'anulado'){
+    return rec.voidedAt || rec.timestamp;
+  }
+  if(rec.status === 'cargado'){
+    // Si se cerró desde incompleto, la última ronda de entrega es la fecha de cierre
+    const rounds = rec.deliveryRounds || [];
+    if(rounds.length > 0) return rounds[rounds.length - 1].timestamp;
+    return rec.timestamp;
+  }
+  if(rec.status === 'incompleto'){
+    // La actividad más reciente: último producto reportado o última entrega parcial
+    const dates = [rec.timestamp];
+    (rec.pendingItems || []).forEach(item => { if(item.addedAt) dates.push(item.addedAt); });
+    (rec.deliveryRounds || []).forEach(round => { if(round.timestamp) dates.push(round.timestamp); });
+    return dates.sort().pop();
+  }
+  return rec.timestamp;
+}
+
 function renderStats(){
   const today = new Date().toLocaleDateString('en-CA', { timeZone: TZ });
   const branchVal = branchFilter.value;
   let loadedToday = 0, voidToday = 0, attemptsToday = 0, incompleteToday = 0;
   Object.values(cache.folios).forEach(rec => {
     const isBranchMatch = !branchVal || rec.branch === branchVal;
-    const isTodayFolio = dayKey(rec.timestamp) === today;
+    const isActionToday = dayKey(lastActionDate(rec)) === today;
 
-    // Completos, incompletos y anulados: por fecha del folio
-    if(isTodayFolio && isBranchMatch){
+    if(isBranchMatch && isActionToday){
       if(rec.status === 'cargado') loadedToday++;
       if(rec.status === 'anulado') voidToday++;
       if(rec.status === 'incompleto') incompleteToday++;
     }
 
-    // Intentos duplicados: por fecha del INTENTO, no del folio original
-    // Así detecta aunque el folio original sea de otro día
+    // Intentos duplicados: por fecha del intento
     (rec.attempts || []).forEach(attempt => {
       if(dayKey(attempt.timestamp) === today && isBranchMatch) attemptsToday++;
     });
