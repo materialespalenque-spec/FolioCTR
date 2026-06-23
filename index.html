@@ -1049,12 +1049,21 @@ function renderStats(){
   const branchVal = branchFilter.value;
   let loadedToday = 0, voidToday = 0, attemptsToday = 0, incompleteToday = 0;
   Object.values(cache.folios).forEach(rec => {
-    if(dayKey(rec.timestamp) !== today) return;
-    if(branchVal && rec.branch !== branchVal) return;
-    if(rec.status === 'cargado') loadedToday++;
-    if(rec.status === 'anulado') voidToday++;
-    if(rec.status === 'incompleto') incompleteToday++;
-    attemptsToday += (rec.attempts || []).length;
+    const isBranchMatch = !branchVal || rec.branch === branchVal;
+    const isTodayFolio = dayKey(rec.timestamp) === today;
+
+    // Completos, incompletos y anulados: por fecha del folio
+    if(isTodayFolio && isBranchMatch){
+      if(rec.status === 'cargado') loadedToday++;
+      if(rec.status === 'anulado') voidToday++;
+      if(rec.status === 'incompleto') incompleteToday++;
+    }
+
+    // Intentos duplicados: por fecha del INTENTO, no del folio original
+    // Así detecta aunque el folio original sea de otro día
+    (rec.attempts || []).forEach(attempt => {
+      if(dayKey(attempt.timestamp) === today && isBranchMatch) attemptsToday++;
+    });
   });
   statsBar.innerHTML = `
     <div class="stat"><span class="stat-num">${loadedToday}</span><span class="stat-label">Completos hoy</span></div>
